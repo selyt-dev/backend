@@ -4,12 +4,12 @@ const { DataTypes } = require('sequelize')
 module.exports = function (sequelize) {
   return sequelize.define('User', {
     id: {
-      type: DataTypes.UUIDV4,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV1,
       primaryKey: true
     },
     name: {
       type: DataTypes.STRING,
-      unique: true,
       allowNull: false
     },
     email: {
@@ -22,28 +22,19 @@ module.exports = function (sequelize) {
     hash: {
       type: DataTypes.STRING,
       allowNull: false,
-      setterMethods: {
-        setPassword (value) {
-          this.setDataValue('salt', crypto.randomBytes(16).toString('hex'))
-          this.setDataValue(
-            'hash',
-            crypto
-              .pbkdf2Sync(value, this.salt, 1000, 64, 'sha512')
-              .toString('hex')
-          )
-        },
-
-        validatePassword (value) {
-          const hash = crypto
-            .pbkdf2Sync(value, this.salt, 1000, 64, 'sha512')
+      set (value) {
+        this.setDataValue('salt', crypto.randomBytes(16).toString('hex'))
+        this.setDataValue(
+          'hash',
+          crypto
+            .pbkdf2Sync(value, this.getDataValue('salt'), 1000, 64, 'sha512')
             .toString('hex')
-          return this.hash === hash
-        }
+        )
       }
     },
     salt: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     birthDate: {
       type: DataTypes.DATEONLY,
@@ -51,12 +42,19 @@ module.exports = function (sequelize) {
     },
     providerObject: {
       type: DataTypes.JSON,
-      allowNull: false,
-      setterMethods: {
-        setProvider (provider, uid) {
-          this.setDataValue('providerObject', { provider, uid })
-        }
+      allowNull: true,
+      set (provider, uid) {
+        this.setDataValue('providerObject', { provider, uid })
       }
+    },
+    iban: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    nif: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     }
-  })
+  }
+  )
 }

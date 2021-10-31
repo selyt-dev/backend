@@ -141,6 +141,7 @@ module.exports = class Api {
         failed++
       }
     }).then(() => {
+      this.database.sync()
       if (failed) {
         this.logger.warn('%s models loaded, %d failed.', success, failed)
       } else this.logger.info('All %s models loaded without errors.', success)

@@ -24,7 +24,7 @@ module.exports = class Auth extends Route {
       if (!provider) {
         return res
           .status(400)
-          .json({ ok: false, error: 'Invalid OAuth provider.' })
+          .json({ ok: false, message: 'Invalid OAuth provider.' })
       }
 
       return res.redirect(provider.getToken())
@@ -38,7 +38,7 @@ module.exports = class Auth extends Route {
       if (!provider) {
         return res
           .status(400)
-          .json({ ok: false, error: 'Invalid OAuth provider.' })
+          .json({ ok: false, message: 'Invalid OAuth provider.' })
       }
 
       const code = req.query.code
@@ -48,7 +48,7 @@ module.exports = class Auth extends Route {
         .validateCode(code, scope)
         .then(d => res.status(200).json(d.data))
         .catch(error =>
-          res.status(500).json({ ok: false, error: error.message })
+          res.status(500).json({ ok: false, message: error.message })
         )
     })
 
@@ -60,7 +60,7 @@ module.exports = class Auth extends Route {
       if (!provider) {
         return res
           .status(400)
-          .json({ ok: false, error: 'Invalid OAuth provider.' })
+          .json({ ok: false, message: 'Invalid OAuth provider.' })
       }
 
       const token = req.query.token
@@ -68,14 +68,14 @@ module.exports = class Auth extends Route {
       if (!token) {
         return res
           .status(401)
-          .json({ ok: false, error: 'Missing token parameter.' })
+          .json({ ok: false, message: 'Missing token parameter.' })
       }
 
       await provider
         .getUserData(token)
         .then(d => res.status(200).json(d))
         .catch(error =>
-          res.status(500).json({ ok: false, error: error.message })
+          res.status(500).json({ ok: false, message: error.message })
         )
     })
 
