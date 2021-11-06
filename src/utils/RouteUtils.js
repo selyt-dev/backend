@@ -37,8 +37,6 @@ module.exports = class RouteUtils {
       try {
         const value = await schema.validateAsync(body)
 
-        console.log(typeof value.email)
-
         client.database.models.User.findOrCreate({
           where: {
             [Op.or]: [{ email: value.email }, { nif: value.nif }, { phone: value.phone }]
