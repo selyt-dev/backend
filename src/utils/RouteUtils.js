@@ -9,7 +9,7 @@ const Joi = require('joi')
 module.exports = class RouteUtils {
   // Verify registration
   verifyRegister (client) {
-    return async function (req, res, next) {
+    return async function (req, res) {
       const body = req.body
 
       const schema = Joi.object({
@@ -73,7 +73,7 @@ module.exports = class RouteUtils {
 
   // Verify login
   verifyLogin (client) {
-    return async function (req, res, next) {
+    return async function (req, res) {
       const body = req.body
 
       const schema = Joi.object({
