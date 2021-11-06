@@ -1,5 +1,6 @@
 const { Route } = require('../')
 const { Router } = require('express')
+const { execSync } = require('child_process')
 
 const { version } = require('../../package.json')
 
@@ -16,11 +17,13 @@ module.exports = class Main extends Route {
   register (app) {
     const router = Router()
 
-    router.get('/', (req, res) => {
+    router.get('/', (_req, res) => {
       res.status(200).json({
         ok: true,
         environment: process.env.NODE_ENV || 'development',
-        version
+        gitCommit: execSync('git rev-parse HEAD').toString().trim(),
+        version,
+        lastChange: execSync('git log --oneline -1').toString().trim()
       })
     })
 

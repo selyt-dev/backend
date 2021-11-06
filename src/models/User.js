@@ -54,7 +54,13 @@ module.exports = function (sequelize) {
     nif: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    phone: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+      /** validate: {
+        is: /^[0-9]{9}$/
+      } */
     }
-  }
-  )
+  })
 }

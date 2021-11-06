@@ -1,5 +1,5 @@
 const express = require('express')
-const { FileUtils } = require('./utils')
+const { FileUtils, RouteUtils } = require('./utils')
 
 const { Sequelize } = require('sequelize')
 
@@ -17,6 +17,8 @@ module.exports = class Api {
     this.logger = null
 
     this.database = null
+
+    this.routeUtils = new RouteUtils()
   }
 
   async load () {
