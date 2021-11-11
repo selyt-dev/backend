@@ -37,13 +37,11 @@ module.exports = class User extends Route {
           .required(),
         nif: Joi.number()
           .integer()
-          .min(100000000)
-          .max(999999999)
+          .pattern(new RegExp(/[0-9]{9}/))
           .required(),
         phone: Joi.number()
           .integer()
-          .min(100000000)
-          .max(999999999)
+          .pattern(new RegExp(/[0-9]{9}/))
           .required(),
         iban: Joi.string()
           .pattern(new RegExp(/(PT50)([0-9]{21})/))

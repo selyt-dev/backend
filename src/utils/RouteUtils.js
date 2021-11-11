@@ -25,13 +25,11 @@ module.exports = class RouteUtils {
         nif: Joi.number()
           .integer()
           .required()
-          .min(100000000)
-          .max(999999999),
+          .pattern(new RegExp(/[0-9]{9}/)),
         phone: Joi.number()
           .integer()
           .required()
-          .min(100000000)
-          .max(999999999)
+          .pattern(new RegExp(/[0-9]{9}/))
       })
 
       try {
