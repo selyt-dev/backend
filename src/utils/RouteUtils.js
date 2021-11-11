@@ -20,16 +20,18 @@ module.exports = class RouteUtils {
         password: Joi.string()
           .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$'))
           .required(),
-        password_confirmation: Joi.ref('password'),
+        passwordConfirmation: Joi.ref('password'),
         birthDate: Joi.date().required(),
         nif: Joi.number()
           .integer()
-          .required()
-          .pattern(new RegExp(/[0-9]{9}/)),
+          .min(100000000)
+          .max(999999999)
+          .required(),
         phone: Joi.number()
           .integer()
+          .min(100000000)
+          .max(999999999)
           .required()
-          .pattern(new RegExp(/[0-9]{9}/))
       })
 
       try {
