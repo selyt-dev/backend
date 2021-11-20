@@ -40,13 +40,6 @@ module.exports = function (sequelize) {
       type: DataTypes.DATEONLY,
       allowNull: false
     },
-    providerObject: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      set (provider, uid) {
-        this.setDataValue('providerObject', { provider, uid })
-      }
-    },
     iban: {
       type: DataTypes.STRING,
       allowNull: true
@@ -61,6 +54,10 @@ module.exports = function (sequelize) {
       /** validate: {
         is: /^[0-9]{9}$/
       } */
+    },
+    avatar: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   })
 }
