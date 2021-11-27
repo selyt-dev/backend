@@ -56,7 +56,7 @@ module.exports = function (sequelize) {
       } */
     },
     avatar: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(65536),
       allowNull: true
     }
   })

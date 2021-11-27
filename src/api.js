@@ -1,4 +1,6 @@
 const express = require('express')
+const bodyParser = require('body-parser')
+
 const { FileUtils, RouteUtils } = require('./utils')
 
 const { Sequelize } = require('sequelize')
@@ -25,6 +27,7 @@ module.exports = class Api {
     this.app = express()
     this.app.use(express.json())
     this.app.use(require('cors')())
+    this.app.use(bodyParser.raw({ type: 'image/jpeg' }))
 
     this.logger = require('tracer').colorConsole({
       format: '{{timestamp}} <{{title}}> {{message}}'
