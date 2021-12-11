@@ -14,6 +14,10 @@ module.exports = function (sequelize) {
     denomination: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    icon: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   })
 }

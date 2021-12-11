@@ -1,5 +1,7 @@
 const express = require('express')
-const bodyParser = require('body-parser')
+const fileUpload = require('express-fileupload')
+
+const AWS = require('aws-sdk')
 
 const { FileUtils, RouteUtils } = require('./utils')
 
@@ -21,13 +23,22 @@ module.exports = class Api {
     this.database = null
 
     this.routeUtils = new RouteUtils()
+
+    this.S3 = null
+    this.uploadS3 = null
   }
 
   async load () {
+    this.S3 = new AWS.S3({
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_REGION
+    })
+
     this.app = express()
     this.app.use(express.json())
     this.app.use(require('cors')())
-    this.app.use(bodyParser.raw({ type: 'image/jpeg' }))
+    this.app.use(fileUpload())
 
     this.logger = require('tracer').colorConsole({
       format: '{{timestamp}} <{{title}}> {{message}}'
@@ -64,38 +75,6 @@ module.exports = class Api {
 
     route._register(this.app)
     this.routes.push(route)
-    return true
-  }
-
-  initializeOAuthProviders (dirPath = 'src/oauthproviders') {
-    let success = 0
-    let failed = 0
-    return FileUtils.requireDirectory(dirPath, NewOAuthProvider => {
-      if (Object.getPrototypeOf(NewOAuthProvider) !== OAuthProvider) return
-      this.addOAuthProvider(new NewOAuthProvider(this)) ? success++ : failed++
-    }).then(() => {
-      if (failed) {
-        this.logger.warn(
-          '%s OAuth providers loaded, %d failed.',
-          success,
-          failed
-        )
-      } else {
-        this.logger.info(
-          'All %s OAuth providers loaded without errors.',
-          success
-        )
-      }
-    })
-  }
-
-  addOAuthProvider (oauthprovider) {
-    if (!(oauthprovider instanceof OAuthProvider)) {
-      this.logger.warn('%s failed to load - Not a OAuthProvider', oauthprovider)
-      return false
-    }
-
-    this.oauthproviders.push(oauthprovider)
     return true
   }
 

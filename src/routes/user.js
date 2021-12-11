@@ -28,15 +28,8 @@ module.exports = class User extends Route {
       return res.status(200).json({ ok: true, user: res.locals.user })
     })
 
-    router.put('/@me/avatar', this.client.routeUtils.validateLogin(this.client), async (req, res) => {
-      const body = req.body
-
-      try {
-        await this.client.database.models.User.update({ avatar: `data:image/jpeg;base64,${body.toString('base64')}` }, { where: { id: res.locals.user.id } })
-        return res.status(200).json({ ok: true })
-      } catch (err) {
-        return res.status(500).json({ ok: false, error: err })
-      }
+    router.post('/@me/avatar', this.client.routeUtils.validateLogin(this.client), this.client.routeUtils.uploadAvatar(this.client), async (req, res) => {
+      return res.status(200).json({ ok: true })
     })
 
     router.put('/@me', this.client.routeUtils.validateLogin(this.client), async (req, res) => {

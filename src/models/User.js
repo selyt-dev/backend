@@ -58,6 +58,14 @@ module.exports = function (sequelize) {
     avatar: {
       type: DataTypes.STRING(65536),
       allowNull: true
+    },
+    balance: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0
+    },
+    isStaff: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
   })
 }

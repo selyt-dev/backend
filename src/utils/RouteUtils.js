@@ -1,5 +1,6 @@
 /* eslint prefer-regex-literals: "off" */
 const { Op } = require('sequelize')
+const { randomUUID } = require('crypto')
 
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
@@ -163,6 +164,34 @@ module.exports = class RouteUtils {
       } catch (err) {
         return res.status(400).json({ ok: false, message: err.toString() })
       }
+    }
+  }
+
+  // Upload avatar
+  uploadAvatar (client) {
+    return async function (req, res, next) {
+      const body = req.body
+
+      const s3 = client.S3
+      
+      const contentType = req.headers['content-type']
+
+      const params = {
+        Bucket: process.env.AWS_BUCKET,
+        Key: `users/${res.locals.user.id}.jpg`,
+        ContentType: contentType,
+        Body: body
+      }
+
+      s3.upload(params, (err, data) => {
+        if (err) {
+          console.log(err)
+          return res.status(500).json({ ok: false, message: err.toString() })
+        }
+
+        console.log(data)
+        next()
+      })
     }
   }
 }
