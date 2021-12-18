@@ -36,7 +36,7 @@ module.exports = function (sequelize) {
       allowNull: false
     },
     images: {
-      type: DataTypes.ARRAY(DataTypes.STRING), // Store array of base64 encoded images
+      type: DataTypes.ARRAY(DataTypes.STRING), // Store array of image IDs
       allowNull: true
     },
     tags: {

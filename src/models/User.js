@@ -51,21 +51,18 @@ module.exports = function (sequelize) {
     phone: {
       type: DataTypes.INTEGER,
       allowNull: false
-      /** validate: {
-        is: /^[0-9]{9}$/
-      } */
     },
-    avatar: {
-      type: DataTypes.STRING(65536),
-      allowNull: true
+    hasAvatar: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     },
     balance: {
       type: DataTypes.FLOAT,
-      defaultValue: 0
+      defaultValue: 0.0
     },
-    isStaff: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
+    role: {
+      type: DataTypes.ENUM("user", "admin"),
+      defaultValue: "user"
     }
   })
 }

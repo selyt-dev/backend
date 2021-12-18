@@ -7,7 +7,7 @@ const { FileUtils, RouteUtils } = require('./utils')
 
 const { Sequelize } = require('sequelize')
 
-const { Route, OAuthProvider } = require('./structures')
+const { Route } = require('./structures')
 
 module.exports = class Api {
   constructor () {
@@ -47,7 +47,6 @@ module.exports = class Api {
     this.app.listen(this.port, this.hostname, () => {
       this.logger.info('Server listening on port %s', this.port)
       this.initializeRoutes()
-      this.initializeOAuthProviders()
       this.connectToDatabase()
     })
   }
@@ -125,7 +124,7 @@ module.exports = class Api {
         failed++
       }
     }).then(() => {
-      this.database.sync()
+      this.database.sync({ force: true })
       if (failed) {
         this.logger.warn('%s models loaded, %d failed.', success, failed)
       } else this.logger.info('All %s models loaded without errors.', success)
