@@ -6,7 +6,8 @@
   "scripts": {
     "test": "standard",
     "dev": "nodemon -r dotenv/config index.js",
-    "fix": "standard --fix"
+    "fix": "standard --fix",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
