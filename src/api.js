@@ -78,24 +78,14 @@ module.exports = class Api {
   }
 
   async connectToDatabase () {
-    if (!process.env.DATABASE_OBJECT) {
+    if (!process.env.DATABASE_URL) {
       this.logger.warn(
-        "Database not started - Environment variable DATABASE_OBJECT wasn't found."
+        "Database not started - Environment variable DATABASE_URL wasn't found."
       )
       return
     }
 
-    const database = JSON.parse(process.env.DATABASE_OBJECT)
-
-    const sequelize = new Sequelize(
-      database.name,
-      database.username,
-      database.password,
-      {
-        host: database.host,
-        dialect: 'postgres'
-      }
-    )
+    const sequelize = new Sequelize(process.env.DATABASE_URL)
 
     try {
       await sequelize.authenticate()
