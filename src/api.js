@@ -85,7 +85,13 @@ module.exports = class Api {
       return
     }
 
-    const sequelize = new Sequelize(process.env.DATABASE_URL)
+    const sequelize = new Sequelize(process.env.DATABASE_URL, {
+      dialect: 'postgres',
+      ssl: true,
+      dialectOptions: {
+        ssl: true
+      }
+    })
 
     try {
       await sequelize.authenticate()
