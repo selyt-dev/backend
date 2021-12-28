@@ -23,9 +23,9 @@ module.exports = class Main extends Route {
       res.status(200).json({
         ok: true,
         environment: process.env.NODE_ENV || 'development',
-        gitCommit: execSync('git rev-parse HEAD').toString().trim(),
+        gitCommit: execSync('git rev-parse HEAD').toString().trim() || null,
         version,
-        lastChange: execSync('git log --oneline -1').toString().trim(),
+        lastChange: execSync('git log --oneline -1').toString().trim() || null,
         os: {
           platform: process.platform,
           arch: process.arch,
