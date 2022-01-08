@@ -1,4 +1,4 @@
 module.exports = {
-  FileUtils: require('./FileUtils.js'),
-  RouteUtils: require('./RouteUtils.js')
-}
+  FileUtils: require("./FileUtils.js"),
+  RouteUtils: require("./RouteUtils.js"),
+};

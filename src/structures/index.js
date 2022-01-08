@@ -1,3 +1,3 @@
 module.exports = {
-  Route: require('./Route.js')
-}
+  Route: require("./Route.js"),
+};

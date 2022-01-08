@@ -1,66 +1,66 @@
-const { DataTypes } = require('sequelize')
+const { DataTypes } = require("sequelize");
 
 module.exports = function (sequelize) {
-  return sequelize.define('Ad', {
+  return sequelize.define("Ad", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV1,
-      primaryKey: true
+      primaryKey: true,
     },
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'Users',
-        key: 'id'
-      }
+        model: "Users",
+        key: "id",
+      },
     },
     categoryId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'Categories',
-        key: 'id'
-      }
+        model: "Categories",
+        key: "id",
+      },
     },
     title: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     description: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     price: {
       type: DataTypes.DECIMAL(10, 2),
-      allowNull: false
+      allowNull: false,
     },
     images: {
       type: DataTypes.ARRAY(DataTypes.STRING), // Store array of image IDs
-      allowNull: true
+      allowNull: true,
     },
     tags: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true
+      allowNull: true,
     },
     isNegotiable: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false
+      defaultValue: false,
     },
     region: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true
+      defaultValue: true,
     },
     visits: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0
-    }
-  })
-}
+      defaultValue: 0,
+    },
+  });
+};

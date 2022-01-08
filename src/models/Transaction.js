@@ -26,6 +26,6 @@ module.exports = function (sequelize) {
     description: {
       type: DataTypes.STRING,
       allowNull: false,
-    }
+    },
   });
 };

@@ -1,36 +1,36 @@
-const { Route } = require('../')
-const { Router } = require('express')
+const { Route } = require("../");
+const { Router } = require("express");
 
-const { hostname } = require('os')
+const { hostname } = require("os");
 
-const { version } = require('../../package.json')
+const { version } = require("../../package.json");
 
 module.exports = class Main extends Route {
-  constructor (client) {
+  constructor(client) {
     super(
       {
-        name: ''
+        name: "",
       },
       client
-    )
+    );
   }
 
-  register (app) {
-    const router = Router()
+  register(app) {
+    const router = Router();
 
-    router.get('/', (_req, res) => {
+    router.get("/", (_req, res) => {
       res.status(200).json({
         ok: true,
-        environment: process.env.NODE_ENV || 'development',
+        environment: process.env.NODE_ENV || "development",
         version,
         os: {
           platform: process.platform,
           arch: process.arch,
-          hostname: hostname()
-        }
-      })
-    })
+          hostname: hostname(),
+        },
+      });
+    });
 
-    app.use(this.path, router)
+    app.use(this.path, router);
   }
-}
+};

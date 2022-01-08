@@ -1,68 +1,68 @@
-const crypto = require('crypto')
-const { DataTypes } = require('sequelize')
+const crypto = require("crypto");
+const { DataTypes } = require("sequelize");
 
 module.exports = function (sequelize) {
-  return sequelize.define('User', {
+  return sequelize.define("User", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV1,
-      primaryKey: true
+      primaryKey: true,
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        isEmail: true
-      }
+        isEmail: true,
+      },
     },
     hash: {
       type: DataTypes.STRING,
       allowNull: false,
-      set (value) {
-        this.setDataValue('salt', crypto.randomBytes(16).toString('hex'))
+      set(value) {
+        this.setDataValue("salt", crypto.randomBytes(16).toString("hex"));
         this.setDataValue(
-          'hash',
+          "hash",
           crypto
-            .pbkdf2Sync(value, this.getDataValue('salt'), 1000, 64, 'sha512')
-            .toString('hex')
-        )
-      }
+            .pbkdf2Sync(value, this.getDataValue("salt"), 1000, 64, "sha512")
+            .toString("hex")
+        );
+      },
     },
     salt: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     birthDate: {
       type: DataTypes.DATEONLY,
-      allowNull: false
+      allowNull: false,
     },
     iban: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     nif: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
     },
     phone: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
     },
     hasAvatar: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
+      defaultValue: false,
     },
     balance: {
       type: DataTypes.FLOAT,
-      defaultValue: 0.0
+      defaultValue: 0.0,
     },
     role: {
       type: DataTypes.ENUM("user", "admin"),
-      defaultValue: "user"
-    }
-  })
-}
+      defaultValue: "user",
+    },
+  });
+};

@@ -4,10 +4,10 @@
   "description": "API and call handling of the Selyt platform.",
   "main": "index.js",
   "scripts": {
-    "test": "standard",
     "dev": "nodemon -r dotenv/config index.js",
-    "fix": "standard --fix",
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "prettier --check \"**/*.js\"",
+    "fix": "prettier --write \"**/*.js\""
   },
   "repository": {
     "type": "git",
@@ -32,7 +32,7 @@
   "devDependencies": {
     "dotenv": "^10.0.0",
     "nodemon": "^2.0.14",
-    "standard": "^16.0.4"
+    "prettier": "^2.5.1"
   },
   "bugs": {
     "url": "https://github.com/selyt-dev/backend/issues"

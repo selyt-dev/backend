@@ -1,4 +1,4 @@
-const { Api } = require('./src')
-const api = new Api()
+const { Api } = require("./src");
+const api = new Api();
 
-api.load()
+api.load();
