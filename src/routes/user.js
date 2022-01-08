@@ -29,7 +29,12 @@ module.exports = class User extends Route {
     })
 
     router.post('/@me/avatar', this.client.routeUtils.validateLogin(this.client), this.client.routeUtils.uploadAvatar(this.client), async (req, res) => {
-      return res.status(200).json({ ok: true })
+      try {
+        await this.client.database.models.User.update({ hasAvatar: true }, { where: { id: res.locals.user.id } })
+        return res.status(200).json({ ok: true })
+      } catch (error) {
+        return res.status(500).json({ ok: false, message: error.toString() })
+      }  
     })
 
     router.put('/@me', this.client.routeUtils.validateLogin(this.client), async (req, res) => {

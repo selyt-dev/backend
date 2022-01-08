@@ -174,13 +174,14 @@ module.exports = class RouteUtils {
 
       const s3 = client.S3
       
-      const contentType = req.headers['content-type']
+      const buf = Buffer.from(req.body.avatar.replace(/^data:image\/\w+;base64,/, ""),'base64')
 
       const params = {
         Bucket: process.env.AWS_BUCKET,
         Key: `users/${res.locals.user.id}.jpg`,
-        ContentType: contentType,
-        Body: body
+        ContentEncoding: 'base64',
+        ContentType: 'image/jpeg',
+        Body: buf
       }
 
       s3.upload(params, (err, data) => {

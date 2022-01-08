@@ -38,7 +38,7 @@ module.exports = class Api {
     this.app = express()
     this.app.use(express.json())
     this.app.use(require('cors')())
-    this.app.use(fileUpload())
+    // this.app.use(fileUpload())
 
     this.logger = require('tracer').colorConsole({
       format: '{{timestamp}} <{{title}}> {{message}}'
