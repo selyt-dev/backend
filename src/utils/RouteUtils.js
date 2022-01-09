@@ -1,6 +1,5 @@
 /* eslint prefer-regex-literals: "off" */
 const { Op } = require("sequelize");
-const { randomUUID } = require("crypto");
 
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
@@ -139,9 +138,7 @@ module.exports = class RouteUtils {
               .toString("hex");
 
             if (hash === user.hash) {
-              const { hash, salt, ...userObj } = user.dataValues;
-
-              res.locals.user = userObj;
+              res.locals.user = user.dataValues;
               return next();
             } else {
               return res

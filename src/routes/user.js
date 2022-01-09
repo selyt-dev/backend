@@ -5,6 +5,8 @@ const { Route } = require("../");
 const { Router } = require("express");
 const Joi = require("joi");
 
+const crypto = require("crypto");
+
 module.exports = class User extends Route {
   constructor(client) {
     super(
@@ -31,7 +33,8 @@ module.exports = class User extends Route {
       "/@me",
       this.client.routeUtils.validateLogin(this.client),
       async (_req, res) => {
-        return res.status(200).json({ ok: true, user: res.locals.user });
+        const { hash, salt, ...userObj } = res.locals.user;
+        return res.status(200).json({ ok: true, user: userObj });
       }
     );
 
@@ -133,33 +136,52 @@ module.exports = class User extends Route {
         const body = req.body;
 
         const schema = Joi.object({
-          password: Joi.string()
+          password: Joi.string().min(8).max(32).required(),
+          newPassword: Joi.string()
             .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"))
             .required(),
-          password_confirmation: Joi.ref("password"),
+          newPasswordConfirmation: Joi.ref("newPassword"),
         });
 
         try {
           const value = await schema.validateAsync(body);
 
-          this.client.database.models.User.update(
-            {
-              hash: value.password,
-            },
-            {
-              where: {
-                id: res.locals.user.id,
+          const hash = crypto
+            .pbkdf2Sync(
+              value.password,
+              res.locals.user.salt,
+              1000,
+              64,
+              "sha512"
+            )
+            .toString("hex");
+
+          if (hash === res.locals.user.hash) {
+            // Password is the same
+
+            this.client.database.models.User.update(
+              {
+                hash: value.newPassword,
               },
-            }
-          )
-            .then(() => {
-              return res.status(200).json({ ok: true });
-            })
-            .catch((err) => {
-              return res
-                .status(500)
-                .json({ ok: false, message: err.toString() });
-            });
+              {
+                where: {
+                  id: res.locals.user.id,
+                },
+              }
+            )
+              .then(() => {
+                return res.status(200).json({ ok: true });
+              })
+              .catch((err) => {
+                return res
+                  .status(500)
+                  .json({ ok: false, message: err.toString() });
+              });
+          } else {
+            return res
+              .status(401)
+              .json({ ok: false, message: "Invalid credentials." });
+          }
         } catch (err) {
           return res.status(400).json({ ok: false, message: err.toString() });
         }
