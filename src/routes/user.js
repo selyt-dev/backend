@@ -59,6 +59,7 @@ module.exports = class User extends Route {
         const body = req.body;
 
         const schema = Joi.object({
+          name: Joi.string().min(3).max(32).required(),
           email: Joi.string().email().required(),
           nif: Joi.number().integer().min(100000000).max(999999999).required(),
           phone: Joi.number()
@@ -80,6 +81,7 @@ module.exports = class User extends Route {
                 { phone: value.phone },
                 { iban: value.iban || "" },
               ],
+              [Op.not]: { id: res.locals.user.id },
             },
           })
             .then((_user) => {
@@ -90,11 +92,20 @@ module.exports = class User extends Route {
                 });
               }
 
-              this.client.database.models.User.update(value, {
-                where: {
-                  id: res.locals.user.id,
+              this.client.database.models.User.update(
+                {
+                  name: value.name,
+                  email: value.email,
+                  nif: value.nif,
+                  phone: value.phone,
+                  iban: value.iban,
                 },
-              })
+                {
+                  where: {
+                    id: res.locals.user.id,
+                  },
+                }
+              )
                 .then(() => {
                   return res.status(200).json({ ok: true });
                 })

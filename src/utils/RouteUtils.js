@@ -14,7 +14,7 @@ module.exports = class RouteUtils {
       const body = req.body;
 
       const schema = Joi.object({
-        name: Joi.string().required(),
+        name: Joi.string().min(3).max(32).required(),
         email: Joi.string().email().required(),
         password: Joi.string()
           .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"))
