@@ -38,6 +38,29 @@ module.exports = class User extends Route {
       }
     );
 
+    router.get(
+      "/@me/transactions",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        try {
+          await this.client.database.models.Transaction.findAll({
+            order: [["createdAt", "DESC"]],
+            where: { userId: res.locals.user.id },
+          })
+            .then((transactions) => {
+              return res.status(200).json({ ok: true, transactions });
+            })
+            .catch((err) => {
+              return res
+                .status(500)
+                .json({ ok: false, message: err.toString() });
+            });
+        } catch (err) {
+          return res.status(500).json({ ok: false, message: err.toString() });
+        }
+      }
+    );
+
     router.post(
       "/@me/avatar",
       this.client.routeUtils.validateLogin(this.client),
