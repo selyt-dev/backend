@@ -111,6 +111,24 @@ module.exports = class RouteUtils {
     };
   }
 
+  // Validate ad
+  validateAd(client) {
+    return async function (req, res, next) {
+      const { id } = req.params;
+
+      try {
+        const ad = await client.database.models.Ad.findOne({
+          where: { id },
+        });
+
+        res.locals.ad = ad;
+        next();
+      } catch (err) {
+        return res.status(404).json({ ok: false, message: "Ad not found." });
+      }
+    }
+  }
+
   // Validate login data
   validateLogin(client) {
     return async function (req, res, next) {
