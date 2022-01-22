@@ -126,7 +126,7 @@ module.exports = class RouteUtils {
       } catch (err) {
         return res.status(404).json({ ok: false, message: "Ad not found." });
       }
-    }
+    };
   }
 
   // Validate login data

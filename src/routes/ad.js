@@ -40,44 +40,50 @@ module.exports = class Ad extends Route {
       }
     );
 
-    router.post('/:id/images', this.client.routeUtils.validateLogin(this.client), this.client.routeUtils.validateAd(this.client), async (req, res) => {
-      const { id } = req.params;
-      const { ad } = res.locals;
-      const { images } = req.body;
+    router.post(
+      "/:id/images",
+      this.client.routeUtils.validateLogin(this.client),
+      this.client.routeUtils.validateAd(this.client),
+      async (req, res) => {
+        const { id } = req.params;
+        const { ad } = res.locals;
+        const { images } = req.body;
 
+        const s3 = this.client.S3;
 
-      const s3 = this.client.S3;
+        try {
+          await images.forEach(async (image, i) => {
+            const buf = Buffer.from(
+              image.replace(/^data:image\/\w+;base64,/, ""),
+              "base64"
+            );
 
-      try {
-        await images.forEach(async (image, i) => {
-          const buf = Buffer.from(
-            image.replace(/^data:image\/\w+;base64,/, ""),
-            "base64"
-          );
-    
-          const params = {
-            Bucket: process.env.AWS_BUCKET,
-            Key: `ads/${req.params.id}/${ad.images[i]}.jpg`,
-            ContentEncoding: "base64",
-            ContentType: "image/jpeg",
-            Body: buf,
-          };
+            const params = {
+              Bucket: process.env.AWS_BUCKET,
+              Key: `ads/${req.params.id}/${ad.images[i]}.jpg`,
+              ContentEncoding: "base64",
+              ContentType: "image/jpeg",
+              Body: buf,
+            };
 
-          s3.upload(params, (err, data) => {
-            if (err) {
-              console.log(err);
-              return res.status(500).json({ ok: false, message: err.toString() });
-            }
-    
-            console.log(data);
+            s3.upload(params, (err, data) => {
+              if (err) {
+                console.log(err);
+                return res
+                  .status(500)
+                  .json({ ok: false, message: err.toString() });
+              }
+
+              console.log(data);
+            });
           });
-        });
 
-        return res.status(200).json({ ok: true, ad });
-      } catch (err) {
-        return res.status(500).json({ ok: false, message: err.toString() });
+          return res.status(200).json({ ok: true, ad });
+        } catch (err) {
+          return res.status(500).json({ ok: false, message: err.toString() });
+        }
       }
-    })
+    );
 
     router.post(
       "/create",
