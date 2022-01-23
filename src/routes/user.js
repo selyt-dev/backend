@@ -212,7 +212,7 @@ module.exports = class User extends Route {
       }
     );
 
-    router.post("/@me/recover-password", async (req, res) => {
+    router.post("/recover-password", async (req, res) => {
       const { email } = req.body;
 
       console.log(email);
@@ -252,7 +252,7 @@ module.exports = class User extends Route {
       }
     });
 
-    router.put("/@me/recover-password", async (req, res) => {
+    router.put("/recover-password", async (req, res) => {
       const body = req.body;
 
       const schema = Joi.object({
