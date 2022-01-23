@@ -9,6 +9,8 @@ const { Sequelize } = require("sequelize");
 
 const { Route } = require("./structures");
 
+const nodemailer = require("nodemailer");
+
 module.exports = class Api {
   constructor() {
     this.app = null;
@@ -26,6 +28,8 @@ module.exports = class Api {
 
     this.S3 = null;
     this.uploadS3 = null;
+
+    this.mailer = null;
   }
 
   async load() {
@@ -38,6 +42,16 @@ module.exports = class Api {
     this.app = express();
     this.app.use(express.json());
     this.app.use(require("cors")());
+
+    this.mailer = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false, 
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      },
+    });
     // this.app.use(fileUpload())
 
     this.logger = require("tracer").colorConsole({

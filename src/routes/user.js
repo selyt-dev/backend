@@ -5,6 +5,7 @@ const { Route } = require("../");
 const { Router } = require("express");
 const Joi = require("joi");
 
+const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 module.exports = class User extends Route {
@@ -210,6 +211,95 @@ module.exports = class User extends Route {
         }
       }
     );
+
+    router.post("/@me/recover-password", async (req, res) => {
+      const { email } = req.body;
+
+      console.log(email);
+
+      try {
+        const user = await this.client.database.models.User.findOne({
+          where: { email },
+        });
+
+        if (!user) {
+          return res
+            .status(404)
+            .json({ ok: false, message: "User not found." });
+        }
+
+        const token = jwt.sign(
+          `${user.id}:${user.email}`,
+          process.env.JWT_SECRET
+        );
+
+        const url = `${process.env.FRONTEND_URL}/PasswordRecovery/Recover?token=${token}`;
+
+        const mailOptions = {
+          from: `"Selyt" <${process.env.EMAIL_USER}>`,
+          to: user.email,
+          subject: "Recupere a sua palavra-passe",
+          html: `<p>Olá, ${user.name}.</p><p>Para recuperar a sua palavra-passe, clique no link abaixo:</p><p><a href="${url}">${url}</a></p>`,
+        };
+
+        const mail = await this.client.mailer.sendMail(mailOptions);
+
+        console.log(mail);
+
+        return res.status(200).json({ ok: true });
+      } catch (error) {
+        return res.status(500).json({ ok: false, message: error.toString() });
+      }
+    });
+
+    router.put("/@me/recover-password", async (req, res) => {
+      const body = req.body;
+
+      const schema = Joi.object({
+        token: Joi.string().required(),
+        password: Joi.string()
+          .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"))
+          .required(),
+        passwordConfirmation: Joi.ref("password"),
+      });
+
+      try {
+        const value = await schema.validateAsync(body);
+
+        const token = jwt.verify(value.token, process.env.JWT_SECRET);
+
+        const authData = token.split(":");
+
+        const user = await this.client.database.models.User.findOne({
+          where: { id: authData[0], email: authData[1] },
+        });
+
+        if (!user) {
+          return res
+            .status(404)
+            .json({ ok: false, message: "User not found." });
+        }
+
+        const hash = crypto
+          .pbkdf2Sync(value.password, user.salt, 1000, 64, "sha512")
+          .toString("hex");
+
+        await this.client.database.models.User.update(
+          {
+            hash,
+          },
+          {
+            where: {
+              id: user.id,
+            },
+          }
+        );
+
+        return res.status(200).json({ ok: true });
+      } catch (error) {
+        return res.status(500).json({ ok: false, message: error.toString() });
+      }
+    });
 
     app.use(this.path, router);
   }
