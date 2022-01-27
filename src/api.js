@@ -103,7 +103,7 @@ module.exports = class Api {
       dialect: "postgres",
       ssl: {
         rejectUnauthorized: false,
-      }
+      },
     });
 
     try {

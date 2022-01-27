@@ -23,6 +23,24 @@ module.exports = class Ad extends Route {
     const router = Router();
 
     router.get(
+      "/",
+      this.client.routeUTils.validateLogin(this.client),
+      async (req, res) => {
+        try {
+          const ads = await this.client.database.Ad.findAll({
+            where: {
+              isActive: true,
+            },
+          });
+
+          return res.status(200).json({ ok: true, ads });
+        } catch (error) {
+          return res.status(500).json({ ok: false, message: error.toString() });
+        }
+      }
+    );
+
+    router.get(
       "/@me",
       this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
