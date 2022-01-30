@@ -233,7 +233,7 @@ module.exports = class User extends Route {
           process.env.JWT_SECRET
         );
 
-        const url = `${process.env.FRONTEND_URL}/PasswordRecovery/Recover?token=${token}`;
+        const url = `${process.env.FRONTEND_URL}/PasswordRecovery/Recover?Token=${token}`;
 
         const mailOptions = {
           from: `"Selyt" <${process.env.EMAIL_USER}>`,
@@ -280,13 +280,9 @@ module.exports = class User extends Route {
             .json({ ok: false, message: "User not found." });
         }
 
-        const hash = crypto
-          .pbkdf2Sync(value.password, user.salt, 1000, 64, "sha512")
-          .toString("hex");
-
         await this.client.database.models.User.update(
           {
-            hash,
+            hash: value.password,
           },
           {
             where: {
@@ -297,6 +293,7 @@ module.exports = class User extends Route {
 
         return res.status(200).json({ ok: true });
       } catch (error) {
+        console.log(error);
         return res.status(500).json({ ok: false, message: error.toString() });
       }
     });
