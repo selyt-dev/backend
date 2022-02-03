@@ -252,21 +252,28 @@ module.exports = class User extends Route {
       }
     });
 
-    router.post("/@me/device", this.client.routeUtils.validateLogin(this.client), async (req, res) => {
-      try {
-        await this.client.database.models.User.update({
-          devicePushToken: req.body.deviceToken,
-        }, {
-          where: {
-            id: res.locals.user.id,
-          },
-        })
+    router.post(
+      "/@me/device",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        try {
+          await this.client.database.models.User.update(
+            {
+              devicePushToken: req.body.deviceToken,
+            },
+            {
+              where: {
+                id: res.locals.user.id,
+              },
+            }
+          );
 
-        return res.status(200).json({ ok: true });
-      } catch (error) {
-        return res.status(500).json({ ok: false, message: error.toString() });
+          return res.status(200).json({ ok: true });
+        } catch (error) {
+          return res.status(500).json({ ok: false, message: error.toString() });
+        }
       }
-    })
+    );
 
     router.put("/recover-password", async (req, res) => {
       const body = req.body;

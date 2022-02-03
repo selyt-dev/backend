@@ -67,6 +67,6 @@ module.exports = function (sequelize) {
     devicePushToken: {
       type: DataTypes.STRING,
       allowNull: true,
-    }
+    },
   });
 };
