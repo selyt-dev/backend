@@ -64,5 +64,9 @@ module.exports = function (sequelize) {
       type: DataTypes.ENUM("user", "admin"),
       defaultValue: "user",
     },
+    devicePushToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    }
   });
 };

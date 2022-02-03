@@ -24,7 +24,7 @@ module.exports = class Ad extends Route {
 
     router.get(
       "/",
-      this.client.routeUTils.validateLogin(this.client),
+      this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
         try {
           const ads = await this.client.database.Ad.findAll({
