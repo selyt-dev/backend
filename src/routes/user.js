@@ -94,7 +94,9 @@ module.exports = class User extends Route {
             .min(100000000)
             .max(999999999)
             .required(),
-          iban: Joi.string().pattern(new RegExp(/(PT50)([0-9]{21})/)),
+          iban: Joi.string()
+            .allow(null)
+            .pattern(new RegExp(/(PT50)([0-9]{21})/)),
         });
 
         try {
@@ -108,7 +110,7 @@ module.exports = class User extends Route {
                 { phone: value.phone },
                 { iban: value.iban || "" },
               ],
-              [Op.not]: { id: res.locals.user.id },
+              [Op.not]: [{ id: res.locals.user.id }],
             },
           })
             .then((_user) => {
@@ -312,9 +314,13 @@ module.exports = class User extends Route {
               id: user.id,
             },
           }
-        );
-
-        return res.status(200).json({ ok: true });
+        )
+          .then(() => {
+            return res.status(200).json({ ok: true });
+          })
+          .catch((err) => {
+            return res.status(500).json({ ok: false, message: err.toString() });
+          });
       } catch (error) {
         console.log(error);
         return res.status(500).json({ ok: false, message: error.toString() });

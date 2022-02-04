@@ -91,6 +91,8 @@ module.exports = class RouteUtils {
                 process.env.JWT_SECRET
               );
 
+              console.log(authorization);
+
               return res
                 .status(200)
                 .json({ ok: true, authorization: `Basic ${authorization}` });
