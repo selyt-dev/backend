@@ -137,6 +137,42 @@ module.exports = class Api {
       if (failed) {
         this.logger.warn("%s models loaded, %d failed.", success, failed);
       } else this.logger.info("All %s models loaded without errors.", success);
+
+      // Make joins
+      this.database.models.User.hasMany(this.database.models.SupportRequest, {
+        foreignKey: "userId",
+      });
+      this.database.models.SupportRequest.belongsTo(this.database.models.User, {
+        foreignKey: "userId",
+      });
+
+      this.database.models.User.hasMany(this.database.models.Transaction, {
+        foreignKey: "userId",
+      });
+      this.database.models.Transaction.belongsTo(this.database.models.User, {
+        foreignKey: "userId",
+      });
+
+      this.database.models.User.hasMany(this.database.models.Inbox, {
+        foreignKey: "senderId",
+      });
+      this.database.models.Inbox.belongsTo(this.database.models.User, {
+        foreignKey: "senderId",
+      });
+
+      this.database.models.User.hasMany(this.database.models.Ad, {
+        foreignKey: "userId",
+      });
+      this.database.models.Ad.belongsTo(this.database.models.User, {
+        foreignKey: "userId",
+      });
+
+      this.database.models.Category.hasMany(this.database.models.Ad, {
+        foreignKey: "categoryId",
+      });
+      this.database.models.Ad.belongsTo(this.database.models.Category, {
+        foreignKey: "categoryId",
+      });
     });
   }
 };

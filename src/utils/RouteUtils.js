@@ -111,6 +111,52 @@ module.exports = class RouteUtils {
     };
   }
 
+  verifyLoginAdmin(client) {
+    return async function (req, res) {
+      const body = req.body;
+
+      const schema = Joi.object({
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+      });
+
+      try {
+        const value = await schema.validateAsync(body);
+
+        client.database.models.User.findOne({
+          where: { email: value.email, role: "admin" },
+        })
+          .then((user) => {
+            const hash = crypto
+              .pbkdf2Sync(value.password, user.salt, 1000, 64, "sha512")
+              .toString("hex");
+
+            if (hash === user.hash) {
+              const authorization = jwt.sign(
+                `${user.email}:${value.password}`,
+                process.env.JWT_SECRET
+              );
+
+              return res
+                .status(200)
+                .json({ ok: true, authorization: `Basic ${authorization}` });
+            } else {
+              return res
+                .status(401)
+                .json({ ok: false, message: "Invalid credentials or insufficient permissions." });
+            }
+          })
+          .catch(() => {
+            return res
+              .status(401)
+              .json({ ok: false, message: "Invalid credentials or insufficient permissions." });
+          });
+      } catch (err) {
+        return res.status(400).json({ ok: false, message: err.toString() });
+      }
+    };
+  }
+
   // Validate ad
   validateAd(client) {
     return async function (req, res, next) {
@@ -149,6 +195,52 @@ module.exports = class RouteUtils {
 
         client.database.models.User.findOne({
           where: { email: authData[0] },
+        })
+          .then((user) => {
+            const hash = crypto
+              .pbkdf2Sync(authData[1], user.salt, 1000, 64, "sha512")
+              .toString("hex");
+
+            if (hash === user.hash) {
+              res.locals.user = user.dataValues;
+              return next();
+            } else {
+              return res
+                .status(401)
+                .json({ ok: false, message: "Invalid credentials." });
+            }
+          })
+          .catch(() => {
+            return res
+              .status(401)
+              .json({ ok: false, message: "Invalid credentials." });
+          });
+      } catch (err) {
+        return res.status(400).json({ ok: false, message: err.toString() });
+      }
+    };
+  }
+
+  // Validate login admin
+  validateLoginAdmin(client) {
+    return async function (req, res, next) {
+      let authHeader = req.headers.authorization;
+
+      if (!req.headers.authorization || !authHeader.startsWith("Basic ")) {
+        return res
+          .status(401)
+          .json({ ok: false, message: "User isn't authenticated." });
+      }
+
+      try {
+        authHeader = authHeader.replace("Basic ", "");
+
+        let authData = await jwt.verify(authHeader, process.env.JWT_SECRET);
+
+        authData = authData.split(":");
+
+        client.database.models.User.findOne({
+          where: { email: authData[0], role: "admin" },
         })
           .then((user) => {
             const hash = crypto

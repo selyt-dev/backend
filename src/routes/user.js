@@ -30,6 +30,19 @@ module.exports = class User extends Route {
 
     router.post("/login", this.client.routeUtils.verifyLogin(this.client));
 
+    router.post("/login-admin", this.client.routeUtils.verifyLoginAdmin(this.client));
+
+    // OutSystems doesn't like @'s in the URL
+    
+    router.get(
+      "/me",
+      this.client.routeUtils.validateLogin(this.client),
+      async (_req, res) => {
+        const { hash, salt, ...userObj } = res.locals.user;
+        return res.status(200).json({ ok: true, user: userObj });
+      }
+    );
+
     router.get(
       "/@me",
       this.client.routeUtils.validateLogin(this.client),
@@ -326,6 +339,29 @@ module.exports = class User extends Route {
         return res.status(500).json({ ok: false, message: error.toString() });
       }
     });
+    
+    router.post('/support', this.client.routeUtils.validateLogin(this.client), async (req, res) => {
+      const body = req.body;
+
+      const schema = Joi.object({
+        subject: Joi.string().required(),
+        message: Joi.string().required(),
+      });
+
+      try {
+        const value = await schema.validateAsync(body);
+
+        await this.client.database.models.SupportRequest.create({
+          userId: res.locals.user.id,
+          subject: value.subject,
+          message: value.message
+        })
+
+        return res.status(200).json({ ok: true });
+      } catch (error) {
+        return res.status(500).json({ ok: false, message: error.toString() });
+      }
+    })
 
     app.use(this.path, router);
   }
