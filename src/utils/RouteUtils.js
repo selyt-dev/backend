@@ -141,21 +141,17 @@ module.exports = class RouteUtils {
                 .status(200)
                 .json({ ok: true, authorization: `Basic ${authorization}` });
             } else {
-              return res
-                .status(401)
-                .json({
-                  ok: false,
-                  message: "Invalid credentials or insufficient permissions.",
-                });
-            }
-          })
-          .catch(() => {
-            return res
-              .status(401)
-              .json({
+              return res.status(401).json({
                 ok: false,
                 message: "Invalid credentials or insufficient permissions.",
               });
+            }
+          })
+          .catch(() => {
+            return res.status(401).json({
+              ok: false,
+              message: "Invalid credentials or insufficient permissions.",
+            });
           });
       } catch (err) {
         return res.status(400).json({ ok: false, message: err.toString() });
