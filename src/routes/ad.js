@@ -27,7 +27,7 @@ module.exports = class Ad extends Route {
       this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
         try {
-          const ads = await this.client.database.Ad.findAll({
+          const ads = await this.client.database.models.Ad.findAll({
             where: {
               isActive: true,
             },
@@ -35,6 +35,7 @@ module.exports = class Ad extends Route {
 
           return res.status(200).json({ ok: true, ads });
         } catch (error) {
+          console.log(error);
           return res.status(500).json({ ok: false, message: error.toString() });
         }
       }
@@ -45,58 +46,13 @@ module.exports = class Ad extends Route {
       this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
         try {
-          const ads = await this.client.models.Ad.findAll({
+          const ads = await this.client.database.models.Ad.findAll({
             where: {
               userId: res.locals.user.id,
             },
           });
 
           return res.status(200).json({ ok: true, ads });
-        } catch (err) {
-          return res.status(500).json({ ok: false, message: err.toString() });
-        }
-      }
-    );
-
-    router.post(
-      "/:id/images",
-      this.client.routeUtils.validateLogin(this.client),
-      this.client.routeUtils.validateAd(this.client),
-      async (req, res) => {
-        const { id } = req.params;
-        const { ad } = res.locals;
-        const { images } = req.body;
-
-        const s3 = this.client.S3;
-
-        try {
-          await images.forEach(async (image, i) => {
-            const buf = Buffer.from(
-              image.replace(/^data:image\/\w+;base64,/, ""),
-              "base64"
-            );
-
-            const params = {
-              Bucket: process.env.AWS_BUCKET,
-              Key: `ads/${req.params.id}/${ad.images[i]}.jpg`,
-              ContentEncoding: "base64",
-              ContentType: "image/jpeg",
-              Body: buf,
-            };
-
-            s3.upload(params, (err, data) => {
-              if (err) {
-                console.log(err);
-                return res
-                  .status(500)
-                  .json({ ok: false, message: err.toString() });
-              }
-
-              console.log(data);
-            });
-          });
-
-          return res.status(200).json({ ok: true, ad });
         } catch (err) {
           return res.status(500).json({ ok: false, message: err.toString() });
         }
@@ -118,12 +74,19 @@ module.exports = class Ad extends Route {
           isNegotiable: Joi.boolean().required(),
           categoryId: Joi.string().required(),
           region: Joi.string().required(),
-          images: Joi.array().items(Joi.string()),
+          images: Joi.array(),
           // tags: Joi.array().items(Joi.string()),
         });
 
         try {
           const value = await schema.validateAsync(body);
+
+          const { images, ...rest } = value;
+
+          const ad = await this.client.database.models.Ad.create({
+            ...rest,
+            userId: res.locals.user.id,
+          });
 
           if (value.images.length > 0) {
             // Generate UUID for images
@@ -134,17 +97,18 @@ module.exports = class Ad extends Route {
               };
             });
 
-            value.images = images;
+            images.forEach(async (image) => {
+              await this.client.routeUtils.uploadAdImage(this.client, ad.id, image);
+            })
 
-            console.log(value);
+            await ad.update({
+              images: images.map((image) => image.id),
+            }, {
+              where: {
+                id: ad.id,
+              },
+            });
           }
-
-          // TODO: Make this work
-
-          const ad = await this.client.database.models.Ad.create({
-            ...value,
-            userId: res.locals.user.id,
-          });
 
           return res.status(200).json({ ok: true, ad });
         } catch (err) {

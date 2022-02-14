@@ -300,4 +300,31 @@ module.exports = class RouteUtils {
       });
     };
   }
+
+  // Upload ad image
+  uploadAdImage(client, adId, imageObject) {
+    return new Promise((resolve, reject) => {
+      const s3 = client.S3;
+
+      const buf = Buffer.from(
+        imageObject.image.replace(/^data:image\/\w+;base64,/, ""),
+        "base64"
+      );
+
+      const params = {
+        Bucket: process.env.AWS_BUCKET,
+        Key: `ads/${adId}/${imageObject.id}.jpg`,
+        ContentEncoding: "base64",
+        ContentType: "image/jpeg",
+        Body: buf,
+      };
+
+      s3.upload(params, (err, data) => {
+        if (err) return reject(err);
+
+        console.log(data);
+        resolve();
+      });
+    });
+  }
 };
