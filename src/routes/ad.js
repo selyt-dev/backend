@@ -98,16 +98,23 @@ module.exports = class Ad extends Route {
             });
 
             images.forEach(async (image) => {
-              await this.client.routeUtils.uploadAdImage(this.client, ad.id, image);
-            })
-
-            await ad.update({
-              images: images.map((image) => image.id),
-            }, {
-              where: {
-                id: ad.id,
-              },
+              await this.client.routeUtils.uploadAdImage(
+                this.client,
+                ad.id,
+                image
+              );
             });
+
+            await ad.update(
+              {
+                images: images.map((image) => image.id),
+              },
+              {
+                where: {
+                  id: ad.id,
+                },
+              }
+            );
           }
 
           return res.status(200).json({ ok: true, ad });
