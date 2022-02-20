@@ -56,10 +56,6 @@ module.exports = function (sequelize) {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    balance: {
-      type: DataTypes.FLOAT,
-      defaultValue: 0.0,
-    },
     role: {
       type: DataTypes.ENUM("user", "admin"),
       defaultValue: "user",
