@@ -27,13 +27,24 @@ module.exports = class Ad extends Route {
       this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
         try {
-          const ads = await this.client.database.models.Ad.findAll({
+          let ads = await this.client.database.models.Ad.findAll({
             where: {
               isActive: true,
             },
+            include: {
+              model: this.client.database.models.User,
+              required: true,
+            },
           });
 
-          return res.status(200).json({ ok: true, ads });
+          const adValues = ads.map((ad) => {
+            ad.dataValues.User.dataValues.hash = undefined;
+            ad.dataValues.User.dataValues.salt = undefined;
+            ad.dataValues.User.devicePushToken = undefined;
+            return ad;
+          });
+
+          return res.status(200).json({ ok: true, ads: adValues });
         } catch (error) {
           console.log(error);
           return res.status(500).json({ ok: false, message: error.toString() });
