@@ -70,6 +70,32 @@ module.exports = class Ad extends Route {
       }
     );
 
+    router.put(
+      "/:id/view",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        try {
+          const ad = await this.client.database.models.Ad.findOne({
+            where: {
+              id: req.params.id,
+            },
+          });
+
+          if (!ad) {
+            return res
+              .status(404)
+              .json({ ok: false, message: "Anúncio não encontrado" });
+          }
+
+          await ad.increment("visits");
+
+          return res.status(200).json({ ok: true });
+        } catch (err) {
+          return res.status(500).json({ ok: false, message: err.toString() });
+        }
+      }
+    );
+
     router.post(
       "/create",
       this.client.routeUtils.validateLogin(this.client),
