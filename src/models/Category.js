@@ -16,7 +16,7 @@ module.exports = function (sequelize) {
       allowNull: false,
     },
     icon: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING, // according to https://materialdesignicons.com/
       allowNull: false,
     },
   });

@@ -31,10 +31,16 @@ module.exports = class Ad extends Route {
             where: {
               isActive: true,
             },
-            include: {
-              model: this.client.database.models.User,
-              required: true,
-            },
+            include: [
+              {
+                model: this.client.database.models.User,
+                required: true,
+              },
+              {
+                model: this.client.database.models.Category,
+                required: true,
+              },
+            ],
           });
 
           const adValues = ads.map((ad) => {
