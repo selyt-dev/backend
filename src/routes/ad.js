@@ -27,7 +27,7 @@ module.exports = class Ad extends Route {
       this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
         try {
-          let ads = await this.client.database.models.Ad.findAll({
+          const ads = await this.client.database.models.Ad.findAll({
             where: {
               isActive: true,
             },
@@ -35,6 +35,9 @@ module.exports = class Ad extends Route {
               {
                 model: this.client.database.models.User,
                 required: true,
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
               },
               {
                 model: this.client.database.models.Category,
@@ -43,16 +46,55 @@ module.exports = class Ad extends Route {
             ],
           });
 
-          const adValues = ads.map((ad) => {
-            ad.dataValues.User.dataValues.hash = undefined;
-            ad.dataValues.User.dataValues.salt = undefined;
-            ad.dataValues.User.devicePushToken = undefined;
-            return ad;
-          });
-
-          return res.status(200).json({ ok: true, ads: adValues });
+          return res.status(200).json({ ok: true, ads });
         } catch (error) {
           console.log(error);
+          return res.status(500).json({ ok: false, message: error.toString() });
+        }
+      }
+    );
+
+    router.get(
+      "/multiple",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        const { ads } = req.query;
+
+        if (!ads) {
+          return res
+            .status(400)
+            .json({ ok: false, message: "Ads not provided" });
+        }
+
+        console.log(ads);
+
+        const adsIds = ads.split(",");
+
+        try {
+          const ads = await this.client.database.models.Ad.findAll({
+            where: {
+              id: {
+                [Op.or]: adsIds,
+              },
+              isActive: true,
+            },
+            include: [
+              {
+                model: this.client.database.models.User,
+                required: true,
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
+              },
+              {
+                model: this.client.database.models.Category,
+                required: true,
+              },
+            ],
+          });
+
+          return res.status(200).json({ ok: true, ads });
+        } catch (error) {
           return res.status(500).json({ ok: false, message: error.toString() });
         }
       }
