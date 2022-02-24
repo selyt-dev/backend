@@ -173,6 +173,32 @@ module.exports = class Api {
       this.database.models.Ad.belongsTo(this.database.models.Category, {
         foreignKey: "categoryId",
       });
+
+      this.database.models.User.hasMany(this.database.models.Inbox, {
+        foreignKey: "senderId",
+      });
+
+      this.database.models.Inbox.belongsTo(this.database.models.User, {
+        as: "sender",
+        foreignKey: "senderId",
+      });
+
+      this.database.models.User.hasMany(this.database.models.Inbox, {
+        foreignKey: "receiverId",
+      });
+
+      this.database.models.Inbox.belongsTo(this.database.models.User, {
+        as: "receiver",
+        foreignKey: "receiverId",
+      });
+
+      this.database.models.Ad.hasMany(this.database.models.Inbox, {
+        foreignKey: "adId",
+      });
+
+      this.database.models.Inbox.belongsTo(this.database.models.Ad, {
+        foreignKey: "adId",
+      });
     });
   }
 };

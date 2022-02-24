@@ -32,8 +32,8 @@ module.exports = function (sequelize) {
       },
     },
     messages: {
-      type: DataTypes.ARRAY(DataTypes.JSON), // { id: UUID, message: STRING, createdAt: DATE }
-      allowNull: false,
+      type: DataTypes.ARRAY(DataTypes.JSON), // { id: UUID, message: STRING, senderId: UUID, createdAt: DATE }
+      allowNull: true,
       defaultValue: [],
     },
   });
