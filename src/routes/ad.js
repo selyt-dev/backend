@@ -168,7 +168,7 @@ module.exports = class Ad extends Route {
 
           const { images, ...rest } = value;
 
-          const ad = await this.client.database.models.Ad.create({
+          let _ad = await this.client.database.models.Ad.create({
             ...rest,
             userId: res.locals.user.id,
           });
@@ -185,7 +185,7 @@ module.exports = class Ad extends Route {
             images.forEach(async (image) => {
               await this.client.routeUtils.uploadAdImage(
                 this.client,
-                ad.id,
+                _ad.id,
                 image
               );
             });
@@ -196,11 +196,30 @@ module.exports = class Ad extends Route {
               },
               {
                 where: {
-                  id: ad.id,
+                  id: _ad.id,
                 },
               }
             );
           }
+
+          const ad = await this.client.database.models.Ad.findOne({
+            where: {
+              id: _ad.id,
+            },
+            include: [
+              {
+                model: this.client.database.models.User,
+                required: true,
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
+              },
+              {
+                model: this.client.database.models.Category,
+                required: true,
+              },
+            ],
+          });
 
           return res.status(200).json({ ok: true, ad });
         } catch (err) {
