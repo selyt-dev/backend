@@ -146,13 +146,6 @@ module.exports = class Api {
         foreignKey: "userId",
       });
 
-      this.database.models.User.hasMany(this.database.models.Transaction, {
-        foreignKey: "userId",
-      });
-      this.database.models.Transaction.belongsTo(this.database.models.User, {
-        foreignKey: "userId",
-      });
-
       this.database.models.User.hasMany(this.database.models.Inbox, {
         foreignKey: "senderId",
       });
