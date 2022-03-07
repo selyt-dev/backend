@@ -52,7 +52,10 @@ module.exports = class Admin extends Route {
       "/support-requests",
       this.client.routeUtils.validateLoginAdmin(this.client),
       async (req, res) => {
-        const { page, limit } = req.query;
+        let { page, limit } = req.query;
+
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 10;
 
         const offset = limit * (page - 1);
 
@@ -66,7 +69,9 @@ module.exports = class Admin extends Route {
             },
           });
 
-        return res.status(200).json({ ok: true, requests });
+        const count = await this.client.database.models.SupportRequest.count();
+
+        return res.status(200).json({ ok: true, requests, page, limit, count });
       }
     );
 

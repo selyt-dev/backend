@@ -99,6 +99,65 @@ module.exports = class Inbox extends Route {
       }
     );
 
+    router.post(
+      "/create",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        try {
+          const { id } = res.locals.user;
+          const { receiverId, adId } = req.body;
+
+          const chat = await this.client.database.models.Inbox.create({
+            senderId: id,
+            receiverId,
+            adId,
+          });
+
+          return res.status(200).json({ ok: true, chat });
+        } catch (error) {
+          return res.status(500).json({ ok: false, message: error.toString() });
+        }
+      }
+    );
+
+    router.put(
+      "/:id",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        try {
+          const { id } = res.locals.user;
+          const { message } = req.body;
+
+          const _message = await this.client.database.models.Message.create({
+            senderId: id,
+            message,
+          });
+
+          const chat = await this.client.database.models.Inbox.update(
+            {
+              messages: _message.id,
+            },
+            {
+              where: {
+                id: req.params.id,
+              },
+            }
+          );
+
+          return res.status(200).json({ ok: true, chat });
+        } catch (error) {
+          return res.status(500).json({ ok: false, message: error.toString() });
+        }
+      }
+    );
+
+    /**
+     * - fazer categorias
+     * - fazer anúncios
+     * - fazer +1 user
+     * - testar mensagens
+     */
+
     app.use(this.path, router);
   }
 };

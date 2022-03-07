@@ -32,9 +32,14 @@ module.exports = function (sequelize) {
       },
     },
     messages: {
-      type: DataTypes.ARRAY(DataTypes.JSON), // { id: UUID, message: STRING, senderId: UUID, createdAt: DATE }
+      type: DataTypes.ARRAY(DataTypes.UUID),
       allowNull: true,
       defaultValue: [],
+      set(value) {
+        const messages = this.getDataValue("messages") || [];
+        messages.push(value);
+        this.setDataValue("messages", messages);
+      }
     },
   });
 };
