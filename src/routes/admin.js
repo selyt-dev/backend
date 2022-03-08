@@ -41,7 +41,7 @@ module.exports = class Admin extends Route {
         if (!supportRequest) {
           return res
             .status(404)
-            .json({ ok: false, message: "Support request not found." });
+            .json({ ok: false, message: this.client.errors.NOT_FOUND });
         }
 
         return res.status(200).json({ ok: true, request: supportRequest });

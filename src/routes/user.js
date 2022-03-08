@@ -67,7 +67,7 @@ module.exports = class User extends Route {
           );
           return res.status(200).json({ ok: true });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: error.toString() });
+          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -134,16 +134,16 @@ module.exports = class User extends Route {
                 .catch((err) => {
                   return res
                     .status(500)
-                    .json({ ok: false, message: err.toString() });
+                    .json({ ok: false, message: ethis.client.errors.SERVER_ERROR });
                 });
             })
             .catch((err) => {
               return res
                 .status(500)
-                .json({ ok: false, message: err.toString() });
+                .json({ ok: false, message: this.client.errors.SERVER_ERROR });
             });
         } catch (err) {
-          return res.status(400).json({ ok: false, message: err.toString() });
+          return res.status(400).json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -194,15 +194,15 @@ module.exports = class User extends Route {
               .catch((err) => {
                 return res
                   .status(500)
-                  .json({ ok: false, message: err.toString() });
+                  .json({ ok: false, message: this.client.errors.SERVER_ERROR });
               });
           } else {
             return res
               .status(401)
-              .json({ ok: false, message: "Invalid credentials." });
+              .json({ ok: false, message: this.client.errors.INVALID_CREDENTIALS });
           }
         } catch (err) {
-          return res.status(400).json({ ok: false, message: err.toString() });
+          return res.status(400).json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -220,7 +220,7 @@ module.exports = class User extends Route {
         if (!user) {
           return res
             .status(404)
-            .json({ ok: false, message: "User not found." });
+            .json({ ok: false, message: this.client.errors.NOT_FOUND });
         }
 
         const token = jwt.sign(
@@ -243,7 +243,7 @@ module.exports = class User extends Route {
 
         return res.status(200).json({ ok: true });
       } catch (error) {
-        return res.status(500).json({ ok: false, message: error.toString() });
+        return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
       }
     });
 
@@ -265,7 +265,7 @@ module.exports = class User extends Route {
 
           return res.status(200).json({ ok: true });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: error.toString() });
+          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -295,7 +295,7 @@ module.exports = class User extends Route {
         if (!user) {
           return res
             .status(404)
-            .json({ ok: false, message: "User not found." });
+            .json({ ok: false, message: this.client.errors.NOT_FOUND });
         }
 
         await this.client.database.models.User.update(
@@ -312,11 +312,11 @@ module.exports = class User extends Route {
             return res.status(200).json({ ok: true });
           })
           .catch((err) => {
-            return res.status(500).json({ ok: false, message: err.toString() });
+            return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
           });
       } catch (error) {
         console.log(error);
-        return res.status(500).json({ ok: false, message: error.toString() });
+        return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
       }
     });
 
@@ -342,7 +342,7 @@ module.exports = class User extends Route {
 
           return res.status(200).json({ ok: true });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: error.toString() });
+          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );

@@ -49,7 +49,7 @@ module.exports = class Ad extends Route {
           return res.status(200).json({ ok: true, ads });
         } catch (error) {
           console.log(error);
-          return res.status(500).json({ ok: false, message: error.toString() });
+          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -95,7 +95,7 @@ module.exports = class Ad extends Route {
 
           return res.status(200).json({ ok: true, ads });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: error.toString() });
+          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -113,7 +113,7 @@ module.exports = class Ad extends Route {
 
           return res.status(200).json({ ok: true, ads });
         } catch (err) {
-          return res.status(500).json({ ok: false, message: err.toString() });
+          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -132,14 +132,14 @@ module.exports = class Ad extends Route {
           if (!ad) {
             return res
               .status(404)
-              .json({ ok: false, message: "Anúncio não encontrado" });
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
           }
 
           await ad.increment("visits");
 
           return res.status(200).json({ ok: true });
         } catch (err) {
-          return res.status(500).json({ ok: false, message: err.toString() });
+          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -224,7 +224,7 @@ module.exports = class Ad extends Route {
           return res.status(200).json({ ok: true, ad });
         } catch (err) {
           console.log(err);
-          return res.status(500).json({ ok: false, message: err.toString() });
+          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );

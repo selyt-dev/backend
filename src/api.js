@@ -7,7 +7,7 @@ const { FileUtils, RouteUtils } = require("./utils");
 
 const { Sequelize } = require("sequelize");
 
-const { Route } = require("./structures");
+const { Route, ErrorMessage } = require("./structures");
 
 const nodemailer = require("nodemailer");
 
@@ -30,6 +30,8 @@ module.exports = class Api {
     this.uploadS3 = null;
 
     this.mailer = null;
+
+    this.errors = ErrorMessage.ErrorType;
   }
 
   async load() {
