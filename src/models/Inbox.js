@@ -39,7 +39,7 @@ module.exports = function (sequelize) {
         const messages = this.getDataValue("messages") || [];
         messages.push(value);
         this.setDataValue("messages", messages);
-      }
+      },
     },
   });
 };

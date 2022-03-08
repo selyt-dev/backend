@@ -49,7 +49,9 @@ module.exports = class Ad extends Route {
           return res.status(200).json({ ok: true, ads });
         } catch (error) {
           console.log(error);
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -95,7 +97,9 @@ module.exports = class Ad extends Route {
 
           return res.status(200).json({ ok: true, ads });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -113,7 +117,9 @@ module.exports = class Ad extends Route {
 
           return res.status(200).json({ ok: true, ads });
         } catch (err) {
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -139,7 +145,9 @@ module.exports = class Ad extends Route {
 
           return res.status(200).json({ ok: true });
         } catch (err) {
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -224,7 +232,9 @@ module.exports = class Ad extends Route {
           return res.status(200).json({ ok: true, ad });
         } catch (err) {
           console.log(err);
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );

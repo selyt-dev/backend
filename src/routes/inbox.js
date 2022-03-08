@@ -57,7 +57,9 @@ module.exports = class Inbox extends Route {
           return res.status(200).json({ ok: true, chats });
         } catch (error) {
           console.log(error);
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -94,7 +96,9 @@ module.exports = class Inbox extends Route {
 
           return res.status(200).json({ ok: true, chat });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -115,7 +119,9 @@ module.exports = class Inbox extends Route {
 
           return res.status(200).json({ ok: true, chat });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -146,7 +152,9 @@ module.exports = class Inbox extends Route {
 
           return res.status(200).json({ ok: true, chat });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );

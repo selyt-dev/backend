@@ -67,7 +67,9 @@ module.exports = class User extends Route {
           );
           return res.status(200).json({ ok: true });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -134,7 +136,10 @@ module.exports = class User extends Route {
                 .catch((err) => {
                   return res
                     .status(500)
-                    .json({ ok: false, message: ethis.client.errors.SERVER_ERROR });
+                    .json({
+                      ok: false,
+                      message: ethis.client.errors.SERVER_ERROR,
+                    });
                 });
             })
             .catch((err) => {
@@ -143,7 +148,9 @@ module.exports = class User extends Route {
                 .json({ ok: false, message: this.client.errors.SERVER_ERROR });
             });
         } catch (err) {
-          return res.status(400).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(400)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -194,15 +201,23 @@ module.exports = class User extends Route {
               .catch((err) => {
                 return res
                   .status(500)
-                  .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+                  .json({
+                    ok: false,
+                    message: this.client.errors.SERVER_ERROR,
+                  });
               });
           } else {
             return res
               .status(401)
-              .json({ ok: false, message: this.client.errors.INVALID_CREDENTIALS });
+              .json({
+                ok: false,
+                message: this.client.errors.INVALID_CREDENTIALS,
+              });
           }
         } catch (err) {
-          return res.status(400).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(400)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -243,7 +258,9 @@ module.exports = class User extends Route {
 
         return res.status(200).json({ ok: true });
       } catch (error) {
-        return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        return res
+          .status(500)
+          .json({ ok: false, message: this.client.errors.SERVER_ERROR });
       }
     });
 
@@ -265,7 +282,9 @@ module.exports = class User extends Route {
 
           return res.status(200).json({ ok: true });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
@@ -312,11 +331,15 @@ module.exports = class User extends Route {
             return res.status(200).json({ ok: true });
           })
           .catch((err) => {
-            return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+            return res
+              .status(500)
+              .json({ ok: false, message: this.client.errors.SERVER_ERROR });
           });
       } catch (error) {
         console.log(error);
-        return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        return res
+          .status(500)
+          .json({ ok: false, message: this.client.errors.SERVER_ERROR });
       }
     });
 
@@ -342,7 +365,9 @@ module.exports = class User extends Route {
 
           return res.status(200).json({ ok: true });
         } catch (error) {
-          return res.status(500).json({ ok: false, message: this.client.errors.SERVER_ERROR });
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
