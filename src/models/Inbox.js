@@ -35,11 +35,6 @@ module.exports = function (sequelize) {
       type: DataTypes.ARRAY(DataTypes.UUID),
       allowNull: true,
       defaultValue: [],
-      set(value) {
-        const messages = this.getDataValue("messages") || [];
-        messages.push(value);
-        this.setDataValue("messages", messages);
-      },
     },
   });
 };

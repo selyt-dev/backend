@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op, fn, col } = require("sequelize");
 
 const { Route } = require("../");
 const { Router } = require("express");
@@ -49,6 +49,7 @@ module.exports = class Inbox extends Route {
               },
               {
                 model: this.client.database.models.Ad,
+                as: "ad",
                 required: true,
               },
             ],
@@ -141,7 +142,7 @@ module.exports = class Inbox extends Route {
 
           const chat = await this.client.database.models.Inbox.update(
             {
-              messages: _message.id,
+              messages: fn("array_append", col("messages"), _message.id),
             },
             {
               where: {
@@ -152,6 +153,8 @@ module.exports = class Inbox extends Route {
 
           return res.status(200).json({ ok: true, chat });
         } catch (error) {
+          console.error(error);
+
           return res
             .status(500)
             .json({ ok: false, message: this.client.errors.SERVER_ERROR });

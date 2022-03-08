@@ -192,6 +192,7 @@ module.exports = class Api {
       });
 
       this.database.models.Inbox.belongsTo(this.database.models.Ad, {
+        as: "ad",
         foreignKey: "adId",
       });
     });
