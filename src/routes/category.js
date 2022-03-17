@@ -40,6 +40,22 @@ module.exports = class Category extends Route {
       }
     );
 
+    router.post(
+      "/",
+      this.client.routeUtils.validateLoginAdmin(this.client),
+      async (req, res) => {
+        const { name, denomination, icon } = req.body;
+
+        const category = await this.client.database.models.Category.create({
+          name,
+          denomination,
+          icon,
+        });
+
+        return res.status(200).json({ ok: true, category });
+      }
+    );
+
     app.use(this.path, router);
   }
 };
