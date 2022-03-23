@@ -239,6 +239,56 @@ module.exports = class Ad extends Route {
       }
     );
 
+    router.get(
+      "/search",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        const { query } = req.query;
+
+        if (!query) {
+          return res
+            .status(400)
+            .json({ ok: false, message: "Query not provided" });
+        }
+
+        try {
+          const ads = await this.client.database.models.Ad.findAll({
+            where: {
+              title: {
+                [Op.like]: `%${query}%`,
+              },
+              isActive: true,
+            },
+            include: [
+              {
+                model: this.client.database.models.User,
+                required: true,
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
+              },
+              {
+                model: this.client.database.models.Category,
+                required: true,
+              },
+            ],
+          });
+
+          if (ads.length === 0) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          return res.status(200).json({ ok: true, ads });
+        } catch (err) {
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
     app.use(this.path, router);
   }
 };
