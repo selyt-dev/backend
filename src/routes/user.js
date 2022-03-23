@@ -89,9 +89,6 @@ module.exports = class User extends Route {
             .min(100000000)
             .max(999999999)
             .required(),
-          iban: Joi.string()
-            .allow(null)
-            .pattern(new RegExp(/(PT50)([0-9]{21})/)),
         });
 
         try {
@@ -103,7 +100,6 @@ module.exports = class User extends Route {
                 { email: value.email },
                 { nif: value.nif },
                 { phone: value.phone },
-                { iban: value.iban || "" },
               ],
               [Op.not]: [{ id: res.locals.user.id }],
             },
@@ -122,7 +118,6 @@ module.exports = class User extends Route {
                   email: value.email,
                   nif: value.nif,
                   phone: value.phone,
-                  iban: value.iban,
                 },
                 {
                   where: {

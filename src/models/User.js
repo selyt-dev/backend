@@ -40,10 +40,6 @@ module.exports = function (sequelize) {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    iban: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     nif: {
       type: DataTypes.INTEGER,
       allowNull: false,
