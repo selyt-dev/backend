@@ -64,7 +64,6 @@ module.exports = class Ad extends Route {
           const ad = await this.client.database.models.Ad.findOne({
             where: {
               id: req.params.id,
-              isActive: true,
             },
             include: [
               {
@@ -153,6 +152,12 @@ module.exports = class Ad extends Route {
               userId: res.locals.user.id,
             },
           });
+
+          if (!ads) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
 
           return res.status(200).json({ ok: true, ads });
         } catch (err) {
@@ -338,6 +343,7 @@ module.exports = class Ad extends Route {
             description: Joi.string().min(10).max(2000).required(),
             price: Joi.number().min(0).required(),
             isNegotiable: Joi.boolean().required(),
+            isActive: Joi.boolean().required(),
             categoryId: Joi.string().required(),
             region: Joi.string().required(),
             images: Joi.array(),
