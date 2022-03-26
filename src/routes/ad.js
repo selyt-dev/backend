@@ -57,6 +57,47 @@ module.exports = class Ad extends Route {
     );
 
     router.get(
+      "/:id/data",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        try {
+          const ad = await this.client.database.models.Ad.findOne({
+            where: {
+              id: req.params.id,
+              isActive: true,
+            },
+            include: [
+              {
+                model: this.client.database.models.User,
+                required: true,
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
+              },
+              {
+                model: this.client.database.models.Category,
+                required: true,
+              },
+            ],
+          });
+
+          if (!ad) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          return res.status(200).json({ ok: true, ad });
+        } catch (error) {
+          console.log(error);
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
+    router.get(
       "/multiple",
       this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
@@ -67,8 +108,6 @@ module.exports = class Ad extends Route {
             .status(400)
             .json({ ok: false, message: "Ads not provided" });
         }
-
-        console.log(ads);
 
         const adsIds = ads.split(",");
 
@@ -281,6 +320,105 @@ module.exports = class Ad extends Route {
           }
 
           return res.status(200).json({ ok: true, ads });
+        } catch (err) {
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
+    router.put(
+      "/:id/edit",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        try {
+          const schema = Joi.object({
+            title: Joi.string().min(5).max(70).required(),
+            description: Joi.string().min(10).max(2000).required(),
+            price: Joi.number().min(0).required(),
+            isNegotiable: Joi.boolean().required(),
+            categoryId: Joi.string().required(),
+            region: Joi.string().required(),
+            images: Joi.array(),
+            // tags: Joi.array().items(Joi.string()),
+          });
+
+          const value = await schema.validateAsync(req.body);
+
+          const { images, ...rest } = value;
+
+          const ad = await this.client.database.models.Ad.findOne({
+            where: {
+              id: req.params.id,
+            },
+          });
+
+          if (!ad) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          if (ad.userId !== res.locals.user.id) {
+            return res
+              .status(403)
+              .json({ ok: false, message: this.client.errors.FORBIDDEN });
+          }
+
+          await ad.update({
+            ...rest,
+          });
+
+          if (images.length > 0) {
+            // Generate UUID for images
+            const images = value.images.map((image) => {
+              return {
+                id: crypto.randomBytes(16).toString("hex"),
+                image,
+              };
+            });
+
+            images.forEach(async (image) => {
+              await this.client.routeUtils.uploadAdImage(
+                this.client,
+                ad.id,
+                image
+              );
+            });
+
+            await ad.update(
+              {
+                images: images.map((image) => image.id),
+              },
+              {
+                where: {
+                  id: ad.id,
+                },
+              }
+            );
+          }
+
+          const adUpdated = await this.client.database.models.Ad.findOne({
+            where: {
+              id: ad.id,
+            },
+            include: [
+              {
+                model: this.client.database.models.User,
+                required: true,
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
+              },
+              {
+                model: this.client.database.models.Category,
+                required: true,
+              },
+            ],
+          });
+
+          return res.status(200).json({ ok: true, ad: adUpdated });
         } catch (err) {
           return res
             .status(500)

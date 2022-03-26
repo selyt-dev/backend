@@ -6,5 +6,6 @@ module.exports = class ErrorMessage {
     NOT_FOUND: "Not found",
     SERVER_ERROR: "Server error",
     UNKNOWN: "Unknown error",
+    FORBIDDEN: "Forbidden",
   };
 };
