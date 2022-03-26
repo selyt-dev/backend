@@ -28,6 +28,7 @@ module.exports = class Category extends Route {
         const offset = limit * (page - 1);
 
         const categories = await this.client.database.models.Category.findAll({
+          order: [["name", "ASC"]],
           offset,
           limit,
         });

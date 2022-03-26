@@ -1,5 +1,5 @@
 /* eslint prefer-regex-literals: "off" */
-const { Op } = require("sequelize");
+const { Op, where, fn, col } = require("sequelize");
 
 const { Route } = require("..");
 const { Router } = require("express");
@@ -242,7 +242,7 @@ module.exports = class Ad extends Route {
               );
             });
 
-            await ad.update(
+            await _ad.update(
               {
                 images: images.map((image) => image.id),
               },
@@ -284,6 +284,49 @@ module.exports = class Ad extends Route {
     );
 
     router.get(
+      "/search-by-category",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        const { category } = req.query;
+
+        try {
+          const ads = await this.client.database.models.Ad.findAll({
+            where: {
+              categoryId: category,
+              isActive: true,
+            },
+            include: [
+              {
+                model: this.client.database.models.User,
+                required: true,
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
+              },
+              {
+                model: this.client.database.models.Category,
+                required: true,
+              },
+            ],
+          });
+
+          if (!ads) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          return res.status(200).json({ ok: true, ads });
+        } catch (err) {
+          console.log(err);
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
+    router.get(
       "/search",
       this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
@@ -298,9 +341,11 @@ module.exports = class Ad extends Route {
         try {
           const ads = await this.client.database.models.Ad.findAll({
             where: {
-              title: {
-                [Op.like]: `%${query}%`,
-              },
+              title: where(
+                fn("LOWER", col("title")),
+                "LIKE",
+                "%" + query.toLowerCase() + "%"
+              ),
               isActive: true,
             },
             include: [
@@ -391,18 +436,18 @@ module.exports = class Ad extends Route {
                 ad.id,
                 image
               );
-            });
 
-            await ad.update(
-              {
-                images: images.map((image) => image.id),
-              },
-              {
-                where: {
-                  id: ad.id,
+              await ad.update(
+                {
+                  images: fn("array_append", col("images"), image.id),
                 },
-              }
-            );
+                {
+                  where: {
+                    id: ad.id,
+                  },
+                }
+              );
+            });
           }
 
           const adUpdated = await this.client.database.models.Ad.findOne({
