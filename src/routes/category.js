@@ -20,15 +20,19 @@ module.exports = class Category extends Route {
       "/",
       this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
-        let { page, limit } = req.query;
+        let { page, limit, orderBy } = req.query;
 
         page = parseInt(page) || 1;
         limit = parseInt(limit) || 10;
 
+        orderBy = orderBy ? orderBy.split(" ") : ["name", "ASC"];
+        orderBy[0] = this.lowerCaseFirstLetter(orderBy[0]);
+        orderBy[1] = orderBy[1] || "ASC";
+
         const offset = limit * (page - 1);
 
         const categories = await this.client.database.models.Category.findAll({
-          order: [["name", "ASC"]],
+          order: [orderBy],
           offset,
           limit,
         });
@@ -58,5 +62,9 @@ module.exports = class Category extends Route {
     );
 
     app.use(this.path, router);
+  }
+
+  lowerCaseFirstLetter(string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
   }
 };

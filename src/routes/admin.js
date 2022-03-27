@@ -52,10 +52,14 @@ module.exports = class Admin extends Route {
       "/support-requests",
       this.client.routeUtils.validateLoginAdmin(this.client),
       async (req, res) => {
-        let { page, limit } = req.query;
+        let { page, limit, orderBy } = req.query;
 
         page = parseInt(page) || 1;
         limit = parseInt(limit) || 10;
+
+        orderBy = orderBy ? orderBy.split(" ") : ["createdAt", "DESC"];
+        orderBy[0] = this.lowerCaseFirstLetter(orderBy[0]);
+        orderBy[1] = orderBy[1] || "ASC";
 
         const offset = limit * (page - 1);
 
@@ -63,11 +67,18 @@ module.exports = class Admin extends Route {
           await this.client.database.models.SupportRequest.findAll({
             offset,
             limit,
+            order: [orderBy],
             include: {
               model: this.client.database.models.User,
               required: true,
             },
           });
+
+        if (!requests) {
+          return res
+            .status(404)
+            .json({ ok: false, message: this.client.errors.NOT_FOUND });
+        }
 
         const count = await this.client.database.models.SupportRequest.count();
 
@@ -75,6 +86,119 @@ module.exports = class Admin extends Route {
       }
     );
 
+    router.get(
+      "/ads",
+      this.client.routeUtils.validateLoginAdmin(this.client),
+      async (req, res) => {
+        let { page, limit, query, orderBy, categoryId } = req.query;
+
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 10;
+        query = query || "";
+
+        orderBy = orderBy ? orderBy.split(" ") : ["createdAt", "DESC"];
+        orderBy[0] = this.lowerCaseFirstLetter(orderBy[0]);
+        orderBy[1] = orderBy[1] || "ASC";
+
+        categoryId = categoryId || "";
+
+        const offset = limit * (page - 1);
+
+        try {
+          if (categoryId) {
+            const ads = await this.client.database.models.Ad.findAll({
+              where: {
+                [Op.and]: [
+                  {
+                    title: {
+                      [Op.iLike]: `%${query}%`,
+                    },
+                  },
+                  {
+                    categoryId: categoryId,
+                  },
+                ],
+              },
+              offset,
+              limit,
+              order: [orderBy],
+              include: [
+                {
+                  model: this.client.database.models.User,
+                  required: true,
+                  attributes: {
+                    exclude: ["hash", "salt", "devicePushToken"],
+                  },
+                },
+                {
+                  model: this.client.database.models.Category,
+                  required: true,
+                },
+              ],
+            });
+
+            if (!ads) {
+              return res
+                .status(404)
+                .json({ ok: false, message: this.client.errors.NOT_FOUND });
+            }
+
+            const count = await this.client.database.models.Ad.count();
+
+            return res.status(200).json({ ok: true, ads, page, limit, count });
+          } else {
+            const ads = await this.client.database.models.Ad.findAll({
+              where: {
+                [Op.and]: [
+                  {
+                    title: {
+                      [Op.iLike]: `%${query}%`,
+                    },
+                  },
+                ],
+              },
+              offset,
+              limit,
+              order: [orderBy],
+              include: [
+                {
+                  model: this.client.database.models.User,
+                  required: true,
+                  attributes: {
+                    exclude: ["hash", "salt", "devicePushToken"],
+                  },
+                },
+                {
+                  model: this.client.database.models.Category,
+                  required: true,
+                },
+              ],
+            });
+
+            if (!ads) {
+              return res
+                .status(404)
+                .json({ ok: false, message: this.client.errors.NOT_FOUND });
+            }
+
+            const count = await this.client.database.models.Ad.count();
+
+            return res.status(200).json({ ok: true, ads, page, limit, count });
+          }
+        } catch (err) {
+          console.log(err);
+
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
     app.use(this.path, router);
+  }
+
+  lowerCaseFirstLetter(string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
   }
 };
