@@ -12,7 +12,7 @@ const { Route, ErrorMessage } = require("./structures");
 const nodemailer = require("nodemailer");
 
 const socket = require("socket.io");
-const http = require('http');
+const http = require("http");
 
 module.exports = class Api {
   constructor() {
@@ -74,25 +74,25 @@ module.exports = class Api {
       this.connectToDatabase();
     });
 
-    this.io.on('connection', (socket) => {
-      this.logger.info('Someone connected!');
+    this.io.on("connection", (socket) => {
+      this.logger.info("Someone connected!");
 
-      socket.on('authenticate', ({token}) => {
-        this.logger.info('Someone authenticated!');
+      socket.on("authenticate", ({ token }) => {
+        this.logger.info("Someone authenticated!");
         this.logger.info(token);
 
-        this.routeUtils._validateLogin(token, this).then(user => {
-          this.logger.info('User authenticated!');
+        this.routeUtils._validateLogin(token, this).then((user) => {
+          this.logger.info("User authenticated!");
           this.logger.info(user);
-          socket.emit('authenticated', user);
+          socket.emit("authenticated", user);
         });
-      })
+      });
 
-      socket.on('message', ({ message, sid, rid }) => {
-        this.logger.info('Someone sent a message!');
-        this.io.to(rid).emit('message', { message, sid });
-      })
-    })
+      socket.on("message", ({ message, sid, rid }) => {
+        this.logger.info("Someone sent a message!");
+        this.io.to(rid).emit("message", { message, sid });
+      });
+    });
   }
 
   initializeRoutes(dirPath = "src/routes") {
