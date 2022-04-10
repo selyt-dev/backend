@@ -177,6 +177,35 @@ module.exports = class RouteUtils {
     };
   }
 
+  // Validate login data internally
+  _validateLogin(token, client) {
+    return new Promise(async (resolve, reject) => {
+      token = token.replace("Basic ", "");
+
+      let authData = await jwt.verify(token, process.env.JWT_SECRET);
+
+      authData = authData.split(":");
+
+      client.database.models.User.findOne({
+        where: { email: authData[0] },
+      })
+        .then((user) => {
+          const hash = crypto
+            .pbkdf2Sync(authData[1], user.salt, 1000, 64, "sha512")
+            .toString("hex");
+
+          if (hash === user.hash) {
+            resolve(user.dataValues);
+          } else {
+            reject(null);
+          }
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
   // Validate login data
   validateLogin(client) {
     return async function (req, res, next) {

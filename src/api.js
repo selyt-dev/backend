@@ -11,6 +11,9 @@ const { Route, ErrorMessage } = require("./structures");
 
 const nodemailer = require("nodemailer");
 
+const socket = require("socket.io");
+const http = require('http');
+
 module.exports = class Api {
   constructor() {
     this.app = null;
@@ -30,6 +33,9 @@ module.exports = class Api {
     this.uploadS3 = null;
 
     this.mailer = null;
+
+    this.server = null;
+    this.io = null;
 
     this.errors = ErrorMessage.ErrorType;
   }
@@ -60,11 +66,33 @@ module.exports = class Api {
       format: "{{timestamp}} <{{title}}> {{message}}",
     });
 
-    this.app.listen(this.port, this.hostname, () => {
+    this.server = http.createServer(this.app);
+    this.io = socket(this.server);
+    this.server.listen(this.port, () => {
       this.logger.info("Server listening on port %s", this.port);
       this.initializeRoutes();
       this.connectToDatabase();
     });
+
+    this.io.on('connection', (socket) => {
+      this.logger.info('Someone connected!');
+
+      socket.on('authenticate', ({token}) => {
+        this.logger.info('Someone authenticated!');
+        this.logger.info(token);
+
+        this.routeUtils._validateLogin(token, this).then(user => {
+          this.logger.info('User authenticated!');
+          this.logger.info(user);
+          socket.emit('authenticated', user);
+        });
+      })
+
+      socket.on('message', ({ message, sid, rid }) => {
+        this.logger.info('Someone sent a message!');
+        this.io.to(rid).emit('message', { message, sid });
+      })
+    })
   }
 
   initializeRoutes(dirPath = "src/routes") {
