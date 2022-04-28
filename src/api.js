@@ -52,13 +52,24 @@ module.exports = class Api {
     this.app.use(require("cors")());
 
     this.mailer = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
+      host: process.env.EMAIL_SMTP,
+      port: 25,
       secure: false,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    this.mailer.verify((error, success) => {
+      if (error) {
+        this.logger.error("Email verification failed - %s", error.toString());
+      } else {
+        this.logger.log("Email verification successful.");
+      }
     });
     // this.app.use(fileUpload())
 

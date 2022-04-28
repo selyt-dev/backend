@@ -247,6 +247,8 @@ module.exports = class User extends Route {
 
         return res.status(200).json({ ok: true });
       } catch (error) {
+        console.log(error);
+
         return res
           .status(500)
           .json({ ok: false, message: this.client.errors.SERVER_ERROR });
