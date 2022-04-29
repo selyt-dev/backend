@@ -1,5 +1,4 @@
 const express = require("express");
-const fileUpload = require("express-fileupload");
 
 const AWS = require("aws-sdk");
 
@@ -53,15 +52,12 @@ module.exports = class Api {
 
     this.mailer = nodemailer.createTransport({
       host: process.env.EMAIL_SMTP,
-      port: 25,
-      secure: false,
+      port: process.env.EMAIL_SMTP_PORT,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
+      }
     });
 
     this.mailer.verify((error, success) => {
@@ -71,7 +67,6 @@ module.exports = class Api {
         this.logger.log("Email verification successful.");
       }
     });
-    // this.app.use(fileUpload())
 
     this.logger = require("tracer").colorConsole({
       format: "{{timestamp}} <{{title}}> {{message}}",
