@@ -7,6 +7,14 @@ module.exports = function (sequelize) {
       defaultValue: DataTypes.UUIDV1,
       primaryKey: true,
     },
+    inboxId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: "Inbox",
+        key: "id",
+      },
+    },
     senderId: {
       type: DataTypes.UUID,
       allowNull: false,

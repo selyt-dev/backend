@@ -4,7 +4,7 @@ const AWS = require("aws-sdk");
 
 const { FileUtils, RouteUtils } = require("./utils");
 
-const { Sequelize } = require("sequelize");
+const { Sequelize, Op } = require("sequelize");
 
 const { Route, ErrorMessage } = require("./structures");
 
@@ -40,33 +40,12 @@ module.exports = class Api {
   }
 
   async load() {
-    this.S3 = new AWS.S3({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: process.env.AWS_REGION,
-    });
-
     this.app = express();
     this.app.use(express.json({ limit: "50mb" }));
     this.app.use(require("cors")());
 
-    this.mailer = nodemailer.createTransport({
-      host: process.env.EMAIL_SMTP,
-      port: process.env.EMAIL_SMTP_PORT,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    this.mailer.verify((error, success) => {
-      if (error) {
-        this.logger.error("Email verification failed - %s", error.toString());
-      } else {
-        this.logger.log("Email verification successful.");
-      }
-    });
+    this.startS3();
+    this.startNodeMailer();
 
     this.logger = require("tracer").colorConsole({
       format: "{{timestamp}} <{{title}}> {{message}}",
@@ -85,19 +64,71 @@ module.exports = class Api {
 
       socket.on("authenticate", ({ token }) => {
         this.logger.info("Someone authenticated!");
-        this.logger.info(token);
 
         this.routeUtils._validateLogin(token, this).then((user) => {
-          this.logger.info("User authenticated!");
-          this.logger.info(user);
+          this.logger.info(`User "${user.name}" authenticated!`);
+
+          this.logger.info("Loading inboxes...");
+
+          const userInboxes = this.database.models.Inbox.findAll({
+            where: {
+              [Op.or]: [{ senderId: user.id }, { receiverId: user.id }],
+            },
+          });
+
+          if (userInboxes) {
+            Promise.all([userInboxes]).then(([inboxes]) => {
+              this.logger.info("Inboxes loaded!");
+
+              for (var i in inboxes) {
+                socket.join(inboxes[i].id);
+              }
+            });
+          }
+
           socket.emit("authenticated", user);
         });
       });
 
-      socket.on("message", ({ message, sid, rid }) => {
-        this.logger.info("Someone sent a message!");
-        this.io.to(rid).emit("message", { message, sid });
+      socket.on("typing", ({ id, receiverId }) => {
+        /** this.logger.info("Someone is typing!");
+        this.logger.info(id);
+        this.logger.info(receiverId); */
+        this.io.to(id).emit("typing", { receiverId });
       });
+
+      socket.on("message", ({ message, senderId, id }) => {
+        this.logger.info("Someone sent a message!");
+        this.io.to(id).emit("message", { message, senderId });
+      });
+    });
+  }
+
+  startS3() {
+    this.S3 = new AWS.S3({
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_REGION,
+    });
+  }
+
+  startNodeMailer() {
+    this.mailer = nodemailer.createTransport({
+      host: process.env.EMAIL_SMTP,
+      port: process.env.EMAIL_SMTP_PORT,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    this.mailer.verify((error, success) => {
+      if (error) {
+        this.logger.error("Email verification failed - %s", error.toString());
+      } else {
+        this.logger.info("Email verification successful.");
+      }
     });
   }
 
@@ -228,6 +259,15 @@ module.exports = class Api {
       this.database.models.Inbox.belongsTo(this.database.models.Ad, {
         as: "ad",
         foreignKey: "adId",
+      });
+
+      this.database.models.Message.belongsTo(this.database.models.User, {
+        as: "sender",
+        foreignKey: "senderId",
+      });
+
+      this.database.models.User.hasMany(this.database.models.Message, {
+        foreignKey: "senderId",
       });
     });
   }

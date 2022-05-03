@@ -57,7 +57,6 @@ module.exports = class Inbox extends Route {
 
           return res.status(200).json({ ok: true, chats });
         } catch (error) {
-          console.log(error);
           return res
             .status(500)
             .json({ ok: false, message: this.client.errors.SERVER_ERROR });
@@ -77,6 +76,15 @@ module.exports = class Inbox extends Route {
             include: [
               {
                 model: this.client.database.models.User,
+                as: "sender",
+                required: true,
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
+              },
+              {
+                model: this.client.database.models.User,
+                as: "receiver",
                 required: true,
                 attributes: {
                   exclude: ["hash", "salt", "devicePushToken"],
@@ -84,6 +92,7 @@ module.exports = class Inbox extends Route {
               },
               {
                 model: this.client.database.models.Ad,
+                as: "ad",
                 required: true,
               },
             ],
@@ -95,7 +104,23 @@ module.exports = class Inbox extends Route {
               .json({ ok: false, message: this.client.errors.NOT_FOUND });
           }
 
-          return res.status(200).json({ ok: true, chat });
+          const messages = await this.client.database.models.Message.findAll({
+            where: {
+              inboxId: req.params.id,
+            },
+            include: [
+              {
+                model: this.client.database.models.User,
+                required: true,
+                as: "sender",
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
+              },
+            ],
+          });
+
+          return res.status(200).json({ ok: true, chat, messages });
         } catch (error) {
           return res
             .status(500)
@@ -110,15 +135,32 @@ module.exports = class Inbox extends Route {
       async (req, res) => {
         try {
           const { id } = res.locals.user;
-          const { receiverId, adId } = req.body;
+          const { adId } = req.body;
 
-          const chat = await this.client.database.models.Inbox.create({
-            senderId: id,
-            receiverId,
-            adId,
+          const ad = await this.client.database.models.Ad.findOne({
+            where: {
+              id: adId,
+            },
+            include: [
+              {
+                model: this.client.database.models.User,
+                required: true,
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
+              },
+            ],
           });
 
-          return res.status(200).json({ ok: true, chat });
+          const chat = await this.client.database.models.Inbox.findOrCreate({
+            where: {
+              senderId: id,
+              receiverId: ad.User.id,
+              adId,
+            },
+          });
+
+          return res.status(200).json({ ok: true, chat: chat[0] });
         } catch (error) {
           return res
             .status(500)
@@ -138,6 +180,7 @@ module.exports = class Inbox extends Route {
           const _message = await this.client.database.models.Message.create({
             senderId: id,
             message,
+            inboxId: req.params.id,
           });
 
           const chat = await this.client.database.models.Inbox.update(
@@ -151,23 +194,30 @@ module.exports = class Inbox extends Route {
             }
           );
 
-          return res.status(200).json({ ok: true, chat });
-        } catch (error) {
-          console.error(error);
+          const messageObj = await this.client.database.models.Message.findOne({
+            where: {
+              id: _message.id,
+            },
+            include: [
+              {
+                model: this.client.database.models.User,
+                required: true,
+                as: "sender",
+                attributes: {
+                  exclude: ["hash", "salt", "devicePushToken"],
+                },
+              },
+            ],
+          });
 
+          return res.status(200).json({ ok: true, chat, message: messageObj });
+        } catch (error) {
           return res
             .status(500)
             .json({ ok: false, message: this.client.errors.SERVER_ERROR });
         }
       }
     );
-
-    /**
-     * - fazer categorias
-     * - fazer anúncios
-     * - fazer +1 user
-     * - testar mensagens
-     */
 
     app.use(this.path, router);
   }
