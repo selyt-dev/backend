@@ -31,10 +31,5 @@ module.exports = function (sequelize) {
         key: "id",
       },
     },
-    messages: {
-      type: DataTypes.ARRAY(DataTypes.UUID),
-      allowNull: true,
-      defaultValue: [],
-    },
   });
 };

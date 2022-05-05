@@ -270,6 +270,15 @@ module.exports = class Api {
       this.database.models.User.hasMany(this.database.models.Message, {
         foreignKey: "senderId",
       });
+
+      this.database.models.Inbox.hasMany(this.database.models.Message, {
+        foreignKey: "inboxId",
+      });
+
+      this.database.models.Message.belongsTo(this.database.models.Inbox, {
+        as: "inbox",
+        foreignKey: "inboxId",
+      });
     });
   }
 };
