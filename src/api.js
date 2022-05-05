@@ -91,14 +91,10 @@ module.exports = class Api {
       });
 
       socket.on("typing", ({ id, receiverId }) => {
-        /** this.logger.info("Someone is typing!");
-        this.logger.info(id);
-        this.logger.info(receiverId); */
         this.io.to(id).emit("typing", { receiverId });
       });
 
       socket.on("message", ({ message, senderId, id }) => {
-        this.logger.info("Someone sent a message!");
         this.io.to(id).emit("message", { message, senderId });
       });
     });
@@ -126,6 +122,7 @@ module.exports = class Api {
     this.mailer.verify((error, success) => {
       if (error) {
         this.logger.error("Email verification failed - %s", error.toString());
+        process.exit(1);
       } else {
         this.logger.info("Email verification successful.");
       }
@@ -141,6 +138,7 @@ module.exports = class Api {
     }).then(() => {
       if (failed) {
         this.logger.warn("%s HTTP routes loaded, %d failed.", success, failed);
+        process.exit(1);
       } else {
         this.logger.info("All %s HTTP routes loaded without errors.", success);
       }
@@ -175,7 +173,7 @@ module.exports = class Api {
 
     try {
       await sequelize.authenticate();
-      this.logger.log("Database connection established successfully.");
+      this.logger.info("Database connection established successfully.");
 
       this.loadModels();
 
@@ -185,6 +183,8 @@ module.exports = class Api {
         "Database connection wasn't established - %s",
         err.toString()
       );
+
+      process.exit(1);
     }
   }
 
@@ -203,6 +203,7 @@ module.exports = class Api {
       this.database.sync();
       if (failed) {
         this.logger.warn("%s models loaded, %d failed.", success, failed);
+        process.exit(1);
       } else this.logger.info("All %s models loaded without errors.", success);
 
       // Make joins
