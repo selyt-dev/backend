@@ -2,6 +2,7 @@ const { Op, fn, col } = require("sequelize");
 
 const { Route } = require("../");
 const { Router } = require("express");
+const Notifications = require("../utils/Notifications");
 
 module.exports = class Inbox extends Route {
   constructor(client) {
@@ -191,6 +192,26 @@ module.exports = class Inbox extends Route {
               where: {
                 id: req.params.id,
               },
+            },
+            {
+              include: [
+                {
+                  model: this.client.database.models.User,
+                  required: true,
+                  as: "receiver",
+                  attributes: {
+                    exclude: ["hash", "salt"],
+                  },
+                },
+                {
+                  model: this.client.database.models.User,
+                  required: true,
+                  as: "sender",
+                  attributes: {
+                    exclude: ["hash", "salt"],
+                  },
+                },
+              ],
             }
           );
 
@@ -209,6 +230,12 @@ module.exports = class Inbox extends Route {
               },
             ],
           });
+
+          await Notifications.sendNotification(
+            "Recebeu uma nova mensagem!",
+            `${chat[0].receiver.name} enviou uma nova mensagem!`,
+            chat[0].receiver.devicePushToken
+          );
 
           return res.status(200).json({ ok: true, chat, message: messageObj });
         } catch (error) {
