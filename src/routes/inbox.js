@@ -1,5 +1,8 @@
 const { Op, fn, col } = require("sequelize");
 
+const Joi = require("joi");
+const crypto = require("crypto");
+
 const { Route } = require("../");
 const { Router } = require("express");
 const Notifications = require("../utils/Notifications");
@@ -242,6 +245,59 @@ module.exports = class Inbox extends Route {
           return res
             .status(500)
             .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
+    router.put(
+      "/:id/upload",
+      this.client.routeUtils.validateLogin(this.client),
+      async (req, res) => {
+        const body = req.body;
+
+        const schema = Joi.object({
+          image: Joi.string().required(),
+        });
+
+        try {
+          const { value } = await schema.validate(body);
+
+          const { id } = res.locals.user;
+
+          const chat = await this.client.database.models.Inbox.findOne({
+            where: {
+              id: req.params.id,
+            },
+          });
+
+          const _image = {
+            id: crypto.randomBytes(16).toString("hex"),
+            image: value.image,
+          };
+
+          console.log(_image.id);
+
+          await this.client.routeUtils.uploadInboxImage(
+            this.client,
+            chat.id,
+            _image
+          );
+
+          await this.client.database.models.Message.create({
+            senderId: id,
+            message: `{${_image.id}.jpg}`,
+            inboxId: chat.id,
+          });
+
+          this.client.io.to(chat.id).emit("message", {
+            message: "Nova imagem enviada!",
+            senderId: id,
+          });
+
+          return res.status(200).json({ ok: true });
+        } catch (error) {
+          console.log(error);
+          return res.status(500).json({ ok: false, message: error.toString() });
         }
       }
     );
