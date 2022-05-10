@@ -86,6 +86,88 @@ module.exports = class Admin extends Route {
       }
     );
 
+    router.post(
+      "/support-request/update-status",
+      this.client.routeUtils.validateLoginAdmin(this.client),
+      async (req, res) => {
+        const { supportRequestId, status } = req.body;
+
+        try {
+          const supportRequest =
+            await this.client.database.models.SupportRequest.findOne({
+              where: { id: supportRequestId },
+            });
+
+          if (!supportRequest) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          await supportRequest.update({
+            status,
+          });
+
+          return res.status(200).json({ ok: true });
+        } catch (error) {
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
+    router.post(
+      "/support-request",
+      this.client.routeUtils.validateLoginAdmin(this.client),
+      async (req, res) => {
+        const { message, supportRequestId } = req.body;
+        const { name } = res.locals.user;
+
+        try {
+          const supportRequest =
+            await this.client.database.models.SupportRequest.findOne({
+              where: {
+                id: supportRequestId,
+              },
+              include: {
+                model: this.client.database.models.User,
+                required: true,
+              },
+            });
+
+          if (!supportRequest) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          this.client.mailer.sendMail({
+            from: `"Selyt" <${process.env.EMAIL_USER}>`,
+            to: supportRequest.User.email,
+            subject: `Resposta ao seu pedido de suporte - ${supportRequest.subject}`,
+            html: `<h1>Olá ${supportRequest.User.name},</h1>
+          <br>
+          <h3>${name} respondeu ao seu pedido de suporte:</h3>
+          <p>${message}</p>
+          <br>
+          <p>Caso o seu problema não tenha sido resolvido, entre em contato connosco.</p>
+          <p>Agradecemos a sua colaboração.</p>
+          <br>
+          <p>Selyt</p>`,
+          });
+
+          return res.status(200).json({ ok: true });
+        } catch (error) {
+          console.log(error);
+
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
     router.get(
       "/ads",
       this.client.routeUtils.validateLoginAdmin(this.client),
