@@ -277,6 +277,91 @@ module.exports = class Admin extends Route {
       }
     );
 
+    router.get(
+      "/users",
+      this.client.routeUtils.validateLoginAdmin(this.client),
+      async (req, res) => {
+        let { page, limit, query, orderBy } = req.query;
+
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 10;
+        query = query || "";
+
+        orderBy = orderBy ? orderBy.split(" ") : ["createdAt", "DESC"];
+        orderBy[0] = this.lowerCaseFirstLetter(orderBy[0]);
+        orderBy[1] = orderBy[1] || "ASC";
+
+        const offset = limit * (page - 1);
+
+        try {
+          const users = await this.client.database.models.User.findAll({
+            where: {
+              [Op.and]: [
+                {
+                  name: {
+                    [Op.iLike]: `%${query}%`,
+                  },
+                },
+              ],
+            },
+            offset,
+            limit,
+            order: [orderBy],
+            attributes: {
+              exclude: ["hash", "salt", "devicePushToken"],
+            },
+          });
+
+          if (!users) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          const count = await this.client.database.models.User.count();
+
+          return res.status(200).json({ ok: true, users, page, limit, count });
+        } catch (err) {
+          console.log(err);
+
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
+    router.get(
+      "/user/:id",
+      this.client.routeUtils.validateLoginAdmin(this.client),
+      async (req, res) => {
+        const { id } = req.params;
+
+        try {
+          const user = await this.client.database.models.User.findOne({
+            where: { id },
+            attributes: {
+              exclude: ["hash", "salt", "devicePushToken"],
+            },
+          });
+
+          if (!user) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          return res.status(200).json({ ok: true, user });
+        } catch (err) {
+          console.log(err);
+
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
     app.use(this.path, router);
   }
 
