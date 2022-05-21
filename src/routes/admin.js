@@ -362,6 +362,62 @@ module.exports = class Admin extends Route {
       }
     );
 
+    router.get(
+      "/statistics",
+      this.client.routeUtils.validateLoginAdmin(this.client),
+      async (req, res) => {
+        try {
+          const solvedSupportRequests =
+            await this.client.database.models.SupportRequest.count({
+              where: { status: "RESOLVED" },
+            });
+
+          const unsolvedSupportRequests =
+            await this.client.database.models.SupportRequest.count({
+              where: {
+                status: "PENDING",
+              },
+            });
+
+          const rejectedSupportRequests =
+            await this.client.database.models.SupportRequest.count({
+              where: {
+                status: "REJECTED",
+              },
+            });
+
+          const activeAds = await this.client.database.models.Ad.count({
+            where: {
+              isActive: true,
+            },
+          });
+
+          const users = await this.client.database.models.User.count();
+
+          return res.status(200).json({
+            ok: true,
+            statistics: {
+              supportRequests: {
+                solved: solvedSupportRequests,
+                unsolved: unsolvedSupportRequests,
+                rejected: rejectedSupportRequests,
+                total:
+                  solvedSupportRequests +
+                  unsolvedSupportRequests +
+                  rejectedSupportRequests,
+              },
+              activeAds,
+              users,
+            },
+          });
+        } catch (err) {
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
     app.use(this.path, router);
   }
 
