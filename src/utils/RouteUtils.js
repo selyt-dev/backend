@@ -16,7 +16,7 @@ module.exports = class RouteUtils {
         name: Joi.string().min(3).max(32).required(),
         email: Joi.string().email().required(),
         password: Joi.string()
-          .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"))
+          .pattern(new RegExp("^(?=.*d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$"))
           .required(),
         passwordConfirmation: Joi.ref("password"),
         birthDate: Joi.date().required(),
