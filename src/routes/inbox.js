@@ -181,15 +181,13 @@ module.exports = class Inbox extends Route {
           const { id } = res.locals.user;
           const { message } = req.body;
 
-          const _message = await this.client.database.models.Message.create({
+          await this.client.database.models.Message.create({
             senderId: id,
-            message + ' ' + Date.now(),
+            message,
             inboxId: req.params.id,
           });
-          
-          console.log(_message);
 
-          const chat = await this.client.database.models.Inbox.find(
+          const chat = await this.client.database.models.Inbox.findOne(
             {
               where: {
                 id: req.params.id,
@@ -200,6 +198,7 @@ module.exports = class Inbox extends Route {
                 {
                   model: this.client.database.models.User,
                   required: true,
+                  foreignKey: "receiverId",
                   as: "receiver",
                   attributes: {
                     exclude: ["hash", "salt"],
@@ -208,6 +207,7 @@ module.exports = class Inbox extends Route {
                 {
                   model: this.client.database.models.User,
                   required: true,
+                  foreignKey: "senderId",
                   as: "sender",
                   attributes: {
                     exclude: ["hash", "salt"],
@@ -217,10 +217,17 @@ module.exports = class Inbox extends Route {
             }
           );
 
+          const _receiver =
+            chat.receiverId === id ? chat.senderId : chat.receiverId;
+
+          const _user = await this.client.database.models.User.findOne({
+            where: { id: _receiver },
+          });
+
           await Notifications.sendNotification(
-            "Recebeu uma nova mensagem",
-            `${chat[0].receiver.name} enviou uma nova mensagem!`,
-            chat[0].receiver.devicePushToken
+            "Recebeu uma nova mensagem!",
+            `${res.locals.user.name} enviou uma nova mensagem!`,
+            _user.devicePushToken
           );
 
           return res.status(200).json({ ok: true, chat });
