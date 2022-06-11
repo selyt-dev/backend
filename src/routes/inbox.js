@@ -173,7 +173,7 @@ module.exports = class Inbox extends Route {
       }
     );
 
-    router.put(
+    router.post(
       "/:id",
       this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
@@ -232,7 +232,7 @@ module.exports = class Inbox extends Route {
       }
     );
 
-    router.put(
+    router.post(
       "/:id/upload",
       this.client.routeUtils.validateLogin(this.client),
       async (req, res) => {
