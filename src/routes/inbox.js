@@ -189,10 +189,7 @@ module.exports = class Inbox extends Route {
           
           console.log(_message);
 
-          const chat = await this.client.database.models.Inbox.update(
-            {
-              messages: fn("array_append", col("messages"), _message.id),
-            },
+          const chat = await this.client.database.models.Inbox.find(
             {
               where: {
                 id: req.params.id,
