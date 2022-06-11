@@ -218,29 +218,13 @@ module.exports = class Inbox extends Route {
             }
           );
 
-          const messageObj = await this.client.database.models.Message.findOne({
-            where: {
-              id: _message.id,
-            },
-            include: [
-              {
-                model: this.client.database.models.User,
-                required: true,
-                as: "sender",
-                attributes: {
-                  exclude: ["hash", "salt", "devicePushToken"],
-                },
-              },
-            ],
-          });
-
           await Notifications.sendNotification(
             "Recebeu uma nova mensagem!",
             `${chat[0].receiver.name} enviou uma nova mensagem!`,
             chat[0].receiver.devicePushToken
           );
 
-          return res.status(200).json({ ok: true, chat, message: messageObj });
+          return res.status(200).json({ ok: true, chat });
         } catch (error) {
           return res
             .status(500)
