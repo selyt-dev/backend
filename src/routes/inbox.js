@@ -218,7 +218,7 @@ module.exports = class Inbox extends Route {
           );
 
           await Notifications.sendNotification(
-            "Recebeu uma nova mensagem!",
+            "Recebeu uma nova mensagem",
             `${chat[0].receiver.name} enviou uma nova mensagem!`,
             chat[0].receiver.devicePushToken
           );
