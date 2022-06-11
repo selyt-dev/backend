@@ -186,6 +186,8 @@ module.exports = class Inbox extends Route {
             message,
             inboxId: req.params.id,
           });
+          
+          console.log(_message);
 
           const chat = await this.client.database.models.Inbox.update(
             {
