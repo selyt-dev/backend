@@ -183,7 +183,7 @@ module.exports = class Inbox extends Route {
 
           const _message = await this.client.database.models.Message.create({
             senderId: id,
-            message,
+            message + ' ' + Date.now(),
             inboxId: req.params.id,
           });
           
