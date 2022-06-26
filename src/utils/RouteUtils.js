@@ -4,6 +4,8 @@ const { Op } = require("sequelize");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 
+const { joiPassword } = require("joi-password");
+
 const Joi = require("joi");
 
 module.exports = class RouteUtils {
@@ -15,10 +17,13 @@ module.exports = class RouteUtils {
       const schema = Joi.object({
         name: Joi.string().min(3).max(32).required(),
         email: Joi.string().email().required(),
-        password: Joi.string()
-          .pattern(
-            new RegExp("^(?=.*d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$")
-          )
+        password: joiPassword
+          .string()
+          .minOfSpecialCharacters(2)
+          .minOfLowercase(2)
+          .minOfUppercase(2)
+          .minOfNumeric(2)
+          .noWhiteSpaces()
           .required(),
         passwordConfirmation: Joi.ref("password"),
         birthDate: Joi.date().required(),
