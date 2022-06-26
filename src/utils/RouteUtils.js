@@ -19,10 +19,10 @@ module.exports = class RouteUtils {
         email: Joi.string().email().required(),
         password: joiPassword
           .string()
-          .minOfSpecialCharacters(2)
-          .minOfLowercase(2)
-          .minOfUppercase(2)
-          .minOfNumeric(2)
+          .minOfSpecialCharacters(1)
+          .minOfLowercase(1)
+          .minOfUppercase(1)
+          .minOfNumeric(1)
           .noWhiteSpaces()
           .required(),
         passwordConfirmation: Joi.ref("password"),

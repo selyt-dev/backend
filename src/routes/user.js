@@ -8,6 +8,8 @@ const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
+const { joiPassword } = require("joi-password");
+
 module.exports = class User extends Route {
   constructor(client) {
     super(
@@ -156,8 +158,13 @@ module.exports = class User extends Route {
 
         const schema = Joi.object({
           password: Joi.string().min(8).max(32).required(),
-          newPassword: Joi.string()
-            .pattern(new RegExp("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"))
+          newPassword: joiPassword
+            .string()
+            .minOfSpecialCharacters(1)
+            .minOfLowercase(1)
+            .minOfUppercase(1)
+            .minOfNumeric(1)
+            .noWhiteSpaces()
             .required(),
           newPasswordConfirmation: Joi.ref("newPassword"),
         });
