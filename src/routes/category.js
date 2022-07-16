@@ -35,6 +35,7 @@ module.exports = class Category extends Route {
           order: [orderBy],
           offset,
           limit,
+          where: { isActive: true },
         });
 
         const count = await this.client.database.models.Category.count();

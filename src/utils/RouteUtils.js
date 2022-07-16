@@ -88,6 +88,13 @@ module.exports = class RouteUtils {
           where: { email: value.email },
         })
           .then((user) => {
+            if (!user.isActive) {
+              return res.status(403).json({
+                ok: false,
+                message: "User is not active.",
+              });
+            }
+
             const hash = crypto
               .pbkdf2Sync(value.password, user.salt, 1000, 64, "sha512")
               .toString("hex");
@@ -134,6 +141,13 @@ module.exports = class RouteUtils {
           where: { email: value.email, role: "admin" },
         })
           .then((user) => {
+            if (!user.isActive) {
+              return res.status(403).json({
+                ok: false,
+                message: "User is not active.",
+              });
+            }
+
             const hash = crypto
               .pbkdf2Sync(value.password, user.salt, 1000, 64, "sha512")
               .toString("hex");
@@ -197,6 +211,13 @@ module.exports = class RouteUtils {
         where: { email: authData[0] },
       })
         .then((user) => {
+          if (!user.isActive) {
+            return res.status(403).json({
+              ok: false,
+              message: "User is not active.",
+            });
+          }
+
           const hash = crypto
             .pbkdf2Sync(authData[1], user.salt, 1000, 64, "sha512")
             .toString("hex");
@@ -235,6 +256,13 @@ module.exports = class RouteUtils {
           where: { email: authData[0] },
         })
           .then((user) => {
+            if (!user.isActive) {
+              return res.status(403).json({
+                ok: false,
+                message: "User is not active.",
+              });
+            }
+
             const hash = crypto
               .pbkdf2Sync(authData[1], user.salt, 1000, 64, "sha512")
               .toString("hex");
@@ -281,6 +309,13 @@ module.exports = class RouteUtils {
           where: { email: authData[0], role: "admin" },
         })
           .then((user) => {
+            if (!user.isActive) {
+              return res.status(403).json({
+                ok: false,
+                message: "User is not active.",
+              });
+            }
+
             const hash = crypto
               .pbkdf2Sync(authData[1], user.salt, 1000, 64, "sha512")
               .toString("hex");

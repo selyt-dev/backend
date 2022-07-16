@@ -168,6 +168,105 @@ module.exports = class Admin extends Route {
       }
     );
 
+    router.post(
+      "/categories/:id/activate",
+      this.client.routeUtils.validateLoginAdmin(this.client),
+      async (req, res) => {
+        const { id } = req.params;
+        const { isActive } = req.body;
+
+        try {
+          const category = await this.client.database.models.Category.findOne({
+            where: { id },
+          });
+
+          if (!category) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          await category.update({
+            isActive,
+          });
+
+          return res.status(200).json({ ok: true });
+        } catch (error) {
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
+    router.post(
+      "/ads/:id/activate",
+      this.client.routeUtils.validateLoginAdmin(this.client),
+      async (req, res) => {
+        const { id } = req.params;
+        const { isActive } = req.body;
+
+        try {
+          const ad = await this.client.database.models.Ad.findOne({
+            where: { id },
+          });
+
+          if (!ad) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          await ad.update({
+            isActive,
+          });
+
+          return res.status(200).json({ ok: true });
+        } catch (error) {
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
+    router.post(
+      "/users/:id/activate",
+      this.client.routeUtils.validateLoginAdmin(this.client),
+      async (req, res) => {
+        const { id } = req.params;
+        const { isActive } = req.body;
+
+        if (res.locals.user === id) {
+          return res
+            .status(400)
+            .json({ ok: false, message: this.client.errors.BAD_REQUEST });
+        }
+
+        try {
+          const user = await this.client.database.models.User.findOne({
+            where: { id },
+          });
+
+          if (!user) {
+            return res
+              .status(404)
+              .json({ ok: false, message: this.client.errors.NOT_FOUND });
+          }
+
+          await user.update({
+            isActive,
+          });
+
+          return res.status(200).json({ ok: true });
+        } catch (error) {
+          return res
+            .status(500)
+            .json({ ok: false, message: this.client.errors.SERVER_ERROR });
+        }
+      }
+    );
+
     router.get(
       "/ads",
       this.client.routeUtils.validateLoginAdmin(this.client),

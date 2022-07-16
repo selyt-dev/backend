@@ -19,5 +19,10 @@ module.exports = function (sequelize) {
       type: DataTypes.STRING, // according to https://materialdesignicons.com/
       allowNull: false,
     },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   });
 };
